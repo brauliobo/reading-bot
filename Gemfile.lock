@@ -103,6 +103,7 @@ GEM
       actionpack (>= 5.2)
       activesupport (>= 5.2)
     hashie (5.0.0)
+    httpclient (2.8.3)
     i18n (1.8.11)
       concurrent-ruby (~> 1.0)
     inherited_resources (1.13.0)
@@ -259,6 +260,7 @@ DEPENDENCIES
   dotenv-rails
   execjs
   hashie
+  httpclient
   listen (~> 3.3)
   pg
   pry

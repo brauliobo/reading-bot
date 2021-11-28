@@ -6,6 +6,7 @@
     "@rails/activestorage": "^6.0.0",
     "@rails/ujs": "^6.0.0",
     "@rails/webpacker": "5.4.3",
+    "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "turbolinks": "^5.2.0",
     "venom-bot": "^4.0.3",
