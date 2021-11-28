@@ -1,0 +1,8 @@
+#!/usr/bin/env ruby
+
+require_relative '../config/environment'
+
+Sender.load
+sender = Sender.new
+sender.send ENV['CHAT_ID'], ARGV[0]
+
