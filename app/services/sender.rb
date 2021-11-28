@@ -29,20 +29,34 @@ class Sender
     group
   end
 
+  def initialize
+  end
+
   def next_text group, last_text
+    last_text ||= group.last_text
     group.parsed_page.next_text last_text
   end
 
   def send chat_id, last_text
     group = self.class.load_group chat_id
     nt    = next_text group, last_text
-    puts nt
+
+    puts "Next text to post: #{nt}"
+    if confirm_yn "#{group.name}: confirm post?"
+      Whatsapp.send_message group.chat_id, nt
+      group.update last_text: nt
+    end
   end
 
   def send_all last_text
     pages.each do |g, p|
       send g.chat_id, last_text
     end
+  end
+
+  def confirm_yn question
+    puts "#{question} (yN)"
+    return true if STDIN.gets.chomp == 'y'
   end
 
 end

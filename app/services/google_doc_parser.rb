@@ -37,13 +37,13 @@ class GoogleDocParser
     lp = paras[i]
     puts "Found last paragraph: \n#{lp}\n\n--------------"
 
-    np = paras[i+1]
+    np = "_#{paras[i+1]}_"
     np = "*#{np}*\n\n" if paras[i-1].blank?
     nt = np
 
     for j in (i+1)..(i+4) do
       break if nt.size > CHARS_LIMIT
-      nt << "#{paras[j]}\n\n"
+      nt << "_#{paras[j]}_\n\n"
     end
 
     nt.strip!

@@ -6,6 +6,7 @@ gem 'hashie'
 gem 'puppeteer-ruby'
 gem 'dotenv-rails'
 gem 'httpclient'
+gem 'highline'
 
 gem 'rails', '~> 6.1.4', '>= 6.1.4.1'
 gem 'bootsnap', '>= 1.4.4', require: false

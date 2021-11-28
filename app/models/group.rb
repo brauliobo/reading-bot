@@ -1,4 +1,4 @@
-class Group < ApplicationRecord
+class Group < Sequel::Model
 
   attr_accessor :page
 
