@@ -3,10 +3,12 @@ source 'https://rubygems.org'
 ruby '3.0.3'
 
 gem 'hashie'
-gem 'puppeteer-ruby'
 gem 'dotenv-rails'
 gem 'httpclient'
 gem 'highline'
+
+gem 'puppeteer-ruby'
+gem 'google-api-client'
 
 gem 'rails', '~> 6.1.4', '>= 6.1.4.1'
 gem 'bootsnap', '>= 1.4.4', require: false

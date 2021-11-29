@@ -12,7 +12,8 @@ class GoogleDocParser
     @sections = @parsed.css('script:contains("DOCS_modelChunkLoadStart")')
   end
 
-  CHARS_LIMIT = 800
+  CHARS_LIMIT   = 800
+  HEADING_LIMIT = 50
 
   def next_text last_text
     # ending of the text
@@ -37,17 +38,26 @@ class GoogleDocParser
     lp = paras[i]
     puts "Found last paragraph: \n#{lp}\n\n--------------"
 
-    np = "_#{paras[i+1]}_"
-    np = "*#{np}*\n\n" if paras[i-1].blank?
+    np = paras[i+1]
+    np = format_one np
+    np = "*#{np}*\n\n" if np.size < HEADING_LIMIT
     nt = np
+    i += 1
 
     for j in (i+1)..(i+4) do
-      break if nt.size > CHARS_LIMIT
-      nt << "_#{paras[j]}_\n\n"
+      p = paras[j]
+      break if nt.size + p.size > CHARS_LIMIT
+      nt << format_one(p)
+      nt << "\n\n"
     end
 
     nt.strip!
     nt
+  end
+
+  def format_one text
+    text.strip!
+    "_#{text}_"
   end
 
   protected

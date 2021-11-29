@@ -23,8 +23,11 @@ class Sender
 
   def self.load_group chat_id
     group = groups[chat_id] ||= Group.where(chat_id: chat_id).first
+
     page  = browser.new_page
+    page.default_navigation_timeout = 60_000
     page.goto group.doc_url, wait_until: 'domcontentloaded'
+
     group.page = page
     group
   end
@@ -40,8 +43,9 @@ class Sender
   def send chat_id, last_text
     group = self.class.load_group chat_id
     nt    = next_text group, last_text
+    return if nt.blank?
 
-    puts "Next text to post: #{nt}"
+    puts "Next text to post:\n#{nt}"
     if confirm_yn "#{group.name}: confirm post?"
       Whatsapp.send_message group.chat_id, nt
       group.update last_text: nt
@@ -55,7 +59,7 @@ class Sender
   end
 
   def confirm_yn question
-    puts "#{question} (yN)"
+    puts "\n#{question} (yN)"
     return true if STDIN.gets.chomp == 'y'
   end
 
