@@ -2,6 +2,8 @@ class GoogleDocParser
 
   attr_reader :page, :parsed, :sections
 
+  CHARS_LIMIT = 800
+
   def initialize page
     @page = page
     reload
@@ -11,9 +13,6 @@ class GoogleDocParser
     @parsed   = Nokogiri::HTML page.content
     @sections = @parsed.css('script:contains("DOCS_modelChunkLoadStart")')
   end
-
-  CHARS_LIMIT   = 800
-  HEADING_LIMIT = 50
 
   def next_text last_text
     # ending of the text
@@ -35,29 +34,18 @@ class GoogleDocParser
     paras.each.with_index do |p, _i|
       break i = _i if p.index last_text
     end
+
     lp = paras[i]
     puts "Found last paragraph: \n#{lp}\n\n--------------"
-
     np = paras[i+1]
-    np = format_one np
-    np = "*#{np}*\n\n" if np.size < HEADING_LIMIT
-    nt = np
-    i += 1
-
-    for j in (i+1)..(i+4) do
-      p = paras[j]
-      break if nt.size + p.size > CHARS_LIMIT
-      nt << format_one(p)
-      nt << "\n\n"
+    nt = [np]
+    for j in (i+2)..(i+4) do
+      break unless p = paras[j]
+      break if nt.join.size + p.size > CHARS_LIMIT
+      nt << p
     end
 
-    nt.strip!
     nt
-  end
-
-  def format_one text
-    text.strip!
-    "_#{text}_"
   end
 
   protected

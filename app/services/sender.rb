@@ -45,9 +45,12 @@ class Sender
     nt    = next_text group, last_text
     return if nt.blank?
 
-    puts "Next text to post:\n#{nt}"
+    fnt = Formatter.new.md nt
+    nt  = nt.join "\n"
+
+    puts "Next text to post:\n#{fnt}"
     if confirm_yn "#{group.name}: confirm post?"
-      Whatsapp.send_message group.chat_id, nt
+      Whatsapp.send_message group.chat_id, fnt
       group.update last_text: nt
     end
   end
