@@ -2,7 +2,8 @@
 
 require_relative '../config/environment'
 
-Sender.load
+#Whatsapp.send_message '5511962429421@c.us', '_teste2_'
+
 sender = Sender.new
 sender.send ENV['CHAT_ID'], ARGV[0]
 

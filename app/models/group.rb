@@ -1,9 +1,9 @@
 class Group < Sequel::Model
 
-  attr_accessor :page
+  attr_accessor :parsed
 
-  def parsed_page
-    @parsed_page ||= GoogleDocParser.new page
+  def parse
+    @parsed ||= self.parser.constantize.new resource
   end
 
 end
