@@ -2,8 +2,6 @@ class GoogleDocParser
 
   attr_reader :page, :parsed, :sections
 
-  CHARS_LIMIT = 800
-
   def initialize page
     @page = page
     reload
@@ -37,15 +35,8 @@ class GoogleDocParser
 
     lp = paras[i]
     puts "Found last paragraph: \n#{lp}\n\n--------------"
-    np = paras[i+1]
-    nt = [np]
-    for j in (i+2)..(i+4) do
-      break unless p = paras[j]
-      break if nt.join.size + p.size > CHARS_LIMIT
-      nt << p
-    end
 
-    nt
+    Selector.new.select paras[(i+1)..-1]
   end
 
   protected
