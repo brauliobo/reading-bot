@@ -14,6 +14,8 @@ class Sender
 
   def next_text group, last_text
     last_text ||= group.last_text
+    last_text   = last_text.last 100 # ending of the text
+
     group.parsed.next_text last_text
   end
 
