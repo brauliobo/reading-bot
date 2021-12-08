@@ -11,7 +11,7 @@ class Selector
       break if nt.join.size + p.size > CHARS_LIMIT
       np = paras[i+1]
       # stop if there is a heading in the middle
-      break if p.size < HEADING_LIMIT and (!np or np.size > HEADING_LIMIT)
+      break if i >=1 and p.size < HEADING_LIMIT and (!np or np.size > HEADING_LIMIT)
       nt << p
     end
 
