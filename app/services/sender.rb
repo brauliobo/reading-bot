@@ -24,10 +24,10 @@ class Sender
     nt    = next_text subscriber, last_text
     return puts "Can't find next! #{nt.inspect}" if nt.blank? or nt.final.blank?
 
-    nt = nt.flat_map do |order, paras|
-      fnt = format paras
-      puts "Next #{order} text to post:\n#{fnt}"
-      fnt
+    fnt = nt.flat_map do |order, paras|
+      fp = format paras
+      puts "Next #{order} text to post:\n#{fp}"
+      fp
     end
 
     return unless confirm_yn "#{subscriber.name}: confirm post?"
@@ -35,7 +35,7 @@ class Sender
       Whatsapp.send_message subscriber.chat_id, fnt
       sleep 1
     end
-    subscriber.update last_text: paras.join("\n")
+    subscriber.update last_text: nt.join("\n")
   end
 
   def format paras

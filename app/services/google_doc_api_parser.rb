@@ -22,7 +22,7 @@ class GoogleDocApiParser < BaseParser
 
   attr_reader :document
 
-  def initialize resource
+  def initialize resource, opts = SymMash.new
     super
     @document = self.class.service.get_document resource
   end

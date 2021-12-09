@@ -19,7 +19,7 @@ class GoogleDocBrowserParser < BaseParser
 
   attr_reader :page, :parsed, :sections
 
-  def initialize resource
+  def initialize resource, opts = SymMash.new
     super
     self.class.load unless browser
 
