@@ -58,9 +58,11 @@ class GoogleDocBrowserParser < BaseParser
     end
 
     lp = paras[i]
-    puts "Found last paragraph: \n#{lp}\n\n--------------"
+    report_last lp
 
-    select paras[(i+1)..-1]
+    SymMash.new(
+      final: select(paras[(i+1)..-1]),
+    )
   end
 
   protected

@@ -22,16 +22,24 @@ class Sender
   def send chat_id, last_text
     group = self.class.load_group chat_id
     nt    = next_text group, last_text
-    return if nt.blank?
+    return puts "Can't find next! #{nt.inspect}" if nt.blank? or nt.final.blank?
 
-    fnt = Formatter.new.md nt
-    nt  = nt.join "\n"
-
-    puts "Next text to post:\n#{fnt}"
-    if confirm_yn "#{group.name}: confirm post?"
-      Whatsapp.send_message group.chat_id, fnt
-      group.update last_text: nt
+    nt = nt.flat_map do |order, paras|
+      fnt = format paras
+      puts "Next #{order} text to post:\n#{fnt}"
+      fnt
     end
+
+    return unless confirm_yn "#{group.name}: confirm post?"
+    nt.each do |fnt|
+      Whatsapp.send_message group.chat_id, fnt
+      sleep 1
+    end
+    group.update last_text: paras.join("\n")
+  end
+
+  def format paras
+    Formatter.new.md paras
   end
 
   def send_all last_text

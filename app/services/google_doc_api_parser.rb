@@ -28,8 +28,14 @@ class GoogleDocApiParser < BaseParser
   end
 
   def next_text last_text
-    paras = lookup_and_parse last_text
-    select paras[1..-1]
+    return unless paras = lookup_and_parse(last_text)
+
+    report_last paras.original.first + paras.final.first
+
+    SymMash.new(
+      original: select(paras.original[1..-1]),
+      final:    select(paras.final[1..-1]),
+    )
   end
 
   protected
@@ -37,14 +43,28 @@ class GoogleDocApiParser < BaseParser
   def lookup_and_parse last_text
     tables = @document.body.content.map{ |c| c.table }.compact
     tables.each do |t|
-      t.table_rows.each_cons 2 do |r, nr|
-        r.table_cells.each_cons 2 do |cl, ncl|
-          next unless content_find cl.content, last_text
-          paras = parse_cell(cl) + parse_cell(ncl)
-          return paras
-        end
+      t.table_rows.each_cons 6 do |r, *others|
+        content = r.table_cells.flat_map(&:content)
+        next unless content_find content, last_text
+
+        all = [r] + others
+        return SymMash.new(
+          original: all.flat_map{ |a| parse_cell a.table_cells.first },
+          final:    all.flat_map{ |a| parse_cell a.table_cells.second },
+        )
       end
     end
+    nil
+  end
+
+  def parse_cell cl
+    paras = cl.content.flat_map do |c|
+      c.paragraph.elements.flat_map do |e|
+        e.text_run.content.strip
+      end
+    end
+    paras.reject!{ |p| p.blank? }
+    paras
   end
 
   def content_find content, last_text
@@ -54,16 +74,6 @@ class GoogleDocApiParser < BaseParser
       end
     end
     false
-  end
-
-  def parse_cell cl
-    paras = cl.content.flat_map do |c|
-      c.paragraph.elements.flat_map do |e|
-        e.text_run.content
-      end
-    end
-    paras.reject!{ |p| p.blank? }
-    paras
   end
 
 end
