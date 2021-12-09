@@ -1,67 +1,84 @@
-# This file is auto-generated from the current state of the database. Instead
-# of editing this file, please use the migrations feature of Active Record to
-# incrementally modify your database, and then regenerate this schema definition.
-#
-# This file is the source Rails uses to define your schema when running `bin/rails
-# db:schema:load`. When creating a new database, `bin/rails db:schema:load` tends to
-# be faster and is potentially less error prone than running all of your
-# migrations from scratch. Old migrations may fail to apply correctly if those
-# migrations use external dependencies or application code.
-#
-# It's strongly recommended that you check this file into your version control system.
-
-ActiveRecord::Schema.define(version: 2021_11_28_022546) do
-
-  # These are extensions that must be enabled in order to support this database
-  enable_extension "plpgsql"
-
-  create_table "active_admin_comments", force: :cascade do |t|
-    t.string "namespace"
-    t.text "body"
-    t.string "resource_type"
-    t.bigint "resource_id"
-    t.string "author_type"
-    t.bigint "author_id"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-    t.index ["author_type", "author_id"], name: "index_active_admin_comments_on_author"
-    t.index ["namespace"], name: "index_active_admin_comments_on_namespace"
-    t.index ["resource_type", "resource_id"], name: "index_active_admin_comments_on_resource"
+Sequel.migration do
+  change do
+    create_table(:active_admin_comments) do
+      primary_key :id, :type=>:Bignum
+      column :namespace, "character varying"
+      column :body, "text"
+      column :resource_type, "character varying"
+      column :resource_id, "bigint"
+      column :author_type, "character varying"
+      column :author_id, "bigint"
+      column :created_at, "timestamp(6) without time zone", :null=>false
+      column :updated_at, "timestamp(6) without time zone", :null=>false
+      
+      index [:author_type, :author_id], :name=>:index_active_admin_comments_on_author
+      index [:namespace], :name=>:index_active_admin_comments_on_namespace
+      index [:resource_type, :resource_id], :name=>:index_active_admin_comments_on_resource
+    end
+    
+    create_table(:admin_users) do
+      primary_key :id, :type=>:Bignum
+      column :email, "character varying", :default=>"", :null=>false
+      column :encrypted_password, "character varying", :default=>"", :null=>false
+      column :reset_password_token, "character varying"
+      column :reset_password_sent_at, "timestamp without time zone"
+      column :remember_created_at, "timestamp without time zone"
+      column :created_at, "timestamp(6) without time zone", :null=>false
+      column :updated_at, "timestamp(6) without time zone", :null=>false
+      
+      index [:email], :name=>:index_admin_users_on_email, :unique=>true
+      index [:reset_password_token], :name=>:index_admin_users_on_reset_password_token, :unique=>true
+    end
+    
+    create_table(:ar_internal_metadata) do
+      column :key, "character varying", :null=>false
+      column :value, "character varying"
+      column :created_at, "timestamp(6) without time zone", :null=>false
+      column :updated_at, "timestamp(6) without time zone", :null=>false
+      
+      primary_key [:key]
+    end
+    
+    create_table(:schema_info) do
+      column :version, "integer", :default=>0, :null=>false
+    end
+    
+    create_table(:schema_migrations) do
+      column :filename, "text"
+    end
+    
+    create_table(:subscribers) do
+      column :service, "text", :null=>false
+      column :chat_id, "text", :null=>false
+      column :name, "text"
+      column :parser, "text"
+      column :resource, "text"
+      column :last_text, "text"
+      column :opts, "jsonb", :default=>Sequel::LiteralString.new("'{}'::jsonb")
+      
+      primary_key [:service, :chat_id]
+    end
+    
+    create_table(:users) do
+      primary_key :id, :type=>:Bignum
+      column :email, "character varying", :default=>"", :null=>false
+      column :encrypted_password, "character varying", :default=>"", :null=>false
+      column :reset_password_token, "character varying"
+      column :reset_password_sent_at, "timestamp without time zone"
+      column :remember_created_at, "timestamp without time zone"
+      column :created_at, "timestamp(6) without time zone", :null=>false
+      column :updated_at, "timestamp(6) without time zone", :null=>false
+      
+      index [:email], :name=>:index_users_on_email, :unique=>true
+      index [:reset_password_token], :name=>:index_users_on_reset_password_token, :unique=>true
+    end
   end
-
-  create_table "admin_users", force: :cascade do |t|
-    t.string "email", default: "", null: false
-    t.string "encrypted_password", default: "", null: false
-    t.string "reset_password_token"
-    t.datetime "reset_password_sent_at"
-    t.datetime "remember_created_at"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-    t.index ["email"], name: "index_admin_users_on_email", unique: true
-    t.index ["reset_password_token"], name: "index_admin_users_on_reset_password_token", unique: true
-  end
-
-  create_table "groups", id: false, force: :cascade do |t|
-    t.text "service"
-    t.text "chat_id"
-    t.text "name"
-    t.text "last_message"
-  end
-
-  create_table "schema_info", id: false, force: :cascade do |t|
-    t.integer "version", default: 0, null: false
-  end
-
-  create_table "users", force: :cascade do |t|
-    t.string "email", default: "", null: false
-    t.string "encrypted_password", default: "", null: false
-    t.string "reset_password_token"
-    t.datetime "reset_password_sent_at"
-    t.datetime "remember_created_at"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-    t.index ["email"], name: "index_users_on_email", unique: true
-    t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
-  end
-
 end
+              Sequel.migration do
+                change do
+                  self << "SET search_path TO \"$user\", public"
+                  self << "INSERT INTO \"schema_migrations\" (\"filename\") VALUES ('20211128022411_devise_create_users.rb')"
+self << "INSERT INTO \"schema_migrations\" (\"filename\") VALUES ('20211128022544_devise_create_admin_users.rb')"
+self << "INSERT INTO \"schema_migrations\" (\"filename\") VALUES ('20211128022546_create_active_admin_comments.rb')"
+                end
+              end

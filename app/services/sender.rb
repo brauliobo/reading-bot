@@ -1,10 +1,10 @@
 class Sender
 
-  class_attribute :groups
-  self.groups = {}
+  class_attribute :subscribers
+  self.subscribers = {}
 
-  def self.load_group chat_id
-    groups[chat_id] ||= Group.where(chat_id: chat_id).first.tap do |g|
+  def self.load_subscriber chat_id
+    subscribers[chat_id] ||= Subscriber.where(chat_id: chat_id).first.tap do |g|
       g.parse
     end
   end
@@ -12,16 +12,16 @@ class Sender
   def initialize
   end
 
-  def next_text group, last_text
-    last_text ||= group.last_text
+  def next_text subscriber, last_text
+    last_text ||= subscriber.last_text
     last_text   = last_text.last 100 # ending of the text
 
-    group.parsed.next_text last_text
+    subscriber.parsed.next_text last_text
   end
 
   def send chat_id, last_text
-    group = self.class.load_group chat_id
-    nt    = next_text group, last_text
+    subscriber = self.class.load_subscriber chat_id
+    nt    = next_text subscriber, last_text
     return puts "Can't find next! #{nt.inspect}" if nt.blank? or nt.final.blank?
 
     nt = nt.flat_map do |order, paras|
@@ -30,12 +30,12 @@ class Sender
       fnt
     end
 
-    return unless confirm_yn "#{group.name}: confirm post?"
+    return unless confirm_yn "#{subscriber.name}: confirm post?"
     nt.each do |fnt|
-      Whatsapp.send_message group.chat_id, fnt
+      Whatsapp.send_message subscriber.chat_id, fnt
       sleep 1
     end
-    group.update last_text: paras.join("\n")
+    subscriber.update last_text: paras.join("\n")
   end
 
   def format paras
