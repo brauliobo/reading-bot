@@ -31,7 +31,7 @@ class Sender
     end
 
     return unless confirm_yn "#{subscriber.name}: confirm post?"
-    nt.each do |fnt|
+    fnt.each do |fnt|
       Whatsapp.send_message subscriber.chat_id, fnt
       sleep 1
     end
