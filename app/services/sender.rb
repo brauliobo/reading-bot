@@ -31,11 +31,11 @@ class Sender
     end
 
     return unless confirm_yn "#{subscriber.name}: confirm post?"
-    fnt.each do |fnt|
-      Whatsapp.send_message subscriber.chat_id, fnt
+    fnt.each do |fnp|
+      Whatsapp.send_message subscriber.chat_id, fnp
       sleep 1
     end
-    subscriber.update last_text: nt.join("\n")
+    subscriber.update last_text: nt.values.join("\n")
   end
 
   def format paras
