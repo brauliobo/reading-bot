@@ -33,7 +33,7 @@ class GoogleDocApiParser < BaseParser
   def next_text last_text
     return unless paras = lookup_and_parse(last_text)
 
-    report_last paras.original.first + paras.final.first
+    report_last [paras.original.first, paras.final.first]
 
     SymMash.new(
       original: select(paras.original[1..-1]),
@@ -47,34 +47,39 @@ class GoogleDocApiParser < BaseParser
     tables = @document.body.content.map{ |c| c.table }.compact
     tables.each do |t|
       t.table_rows.each_cons 6 do |r, *others|
-        content = r.table_cells.flat_map(&:content)
-        next unless content_find content, last_text
+        content = r.table_cells.map(&:content)
+        next unless i = content_find(content, last_text)
 
         all = [r] + others
         return SymMash.new(
-          original: all.flat_map{ |a| parse_cell a.table_cells.first },
-          final:    all.flat_map{ |a| parse_cell a.table_cells.second },
+          original: all.flat_map{ |a| parse_cell a.table_cells.first, i },
+          final:    all.flat_map{ |a| parse_cell a.table_cells.second, i },
         )
       end
     end
     nil
   end
 
-  def parse_cell cl
-    paras = cl.content.flat_map do |c|
-      c.paragraph.elements.flat_map do |e|
-        e.text_run.content.strip
-      end
+  def parse_cell cl, i = 0
+    elements = cl.content.flat_map{ |c| c.paragraph.elements }
+    elements = elements[i..-1]
+
+    paras = elements.map do |e|
+      e.text_run.content.strip
     end
     paras.reject!{ |p| p.blank? }
     paras
   end
 
-  def content_find content, last_text
-    content.each do |c|
-      c.paragraph.elements.each do |e|
+  ##
+  # Return the index of the paragraph found in `content`
+  #
+  def content_find cells_content, last_text
+    cells_content.each do |content|
+      elements = content.flat_map{ |c| c.paragraph.elements }
+      elements.each.with_index do |e, i|
         next unless e.text_run
-        return true if e.text_run.content.index last_text
+        return i if e.text_run.content.index last_text
       end
     end
     false
