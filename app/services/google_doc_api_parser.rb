@@ -19,6 +19,9 @@ class GoogleDocApiParser < BaseParser
       s.authorization = authorizer
     end
   end
+  def self.load
+    service
+  end
 
   attr_reader :document
 
@@ -70,6 +73,7 @@ class GoogleDocApiParser < BaseParser
   def content_find content, last_text
     content.each do |c|
       c.paragraph.elements.each do |e|
+        next unless e.text_run
         return true if e.text_run.content.index last_text
       end
     end

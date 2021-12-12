@@ -4,24 +4,32 @@ class Sender
   self.subscribers = {}
 
   def self.load_subscriber chat_id
-    subscribers[chat_id] ||= Subscriber.where(chat_id: chat_id).first.tap do |g|
-      g.parse
+    subscribers[chat_id] ||= Subscriber.where(chat_id: chat_id).first.tap do |s|
+      s.parse
+    end
+  end
+  def self.load_all
+    GoogleDocBrowserParser.load
+    GoogleDocApiParser.load
+
+    Subscriber.where(enabled: true).all.peach do |s, h|
+      subscribers[s.chat_id] = s.tap{ s.parse }
     end
   end
 
   def initialize
   end
 
-  def next_text subscriber, last_text
-    last_text ||= subscriber.last_text
-    last_text   = last_text.last 100 # ending of the text
-
-    subscriber.parsed.next_text last_text
+  def send_enabled
+    subscribers.each do |chat_id, sub|
+      send chat_id
+    end
   end
 
-  def send chat_id, last_text
-    subscriber = self.class.load_subscriber chat_id
-    nt    = next_text subscriber, last_text
+  def send chat_id, last_text = nil
+    sub = self.class.load_subscriber chat_id
+
+    nt  = next_text sub, last_text
     return puts "Can't find next! #{nt.inspect}" if nt.blank? or nt.final.blank?
 
     fnt = nt.flat_map do |order, paras|
@@ -30,12 +38,19 @@ class Sender
       fp
     end
 
-    return unless confirm_yn "#{subscriber.name}: confirm post?"
+    return unless confirm_yn "#{sub.name}: confirm post?"
     fnt.each do |fnp|
-      Whatsapp.send_message subscriber.chat_id, fnp
+      Whatsapp.send_message sub.chat_id, fnp
       sleep 1
     end
-    subscriber.update last_text: nt.values.join("\n")
+    sub.update last_text: nt.values.join("\n")
+  end
+
+  def next_text subscriber, last_text
+    last_text ||= subscriber.last_text.split("\n").last
+    last_text   = last_text.last 100 # ending of the text
+
+    subscriber.parsed.next_text last_text
   end
 
   def format paras
@@ -43,8 +58,8 @@ class Sender
   end
 
   def send_all last_text
-    pages.each do |g, p|
-      send g.chat_id, last_text
+    pages.each do |s, p|
+      send s.chat_id, last_text
     end
   end
 
