@@ -55,6 +55,8 @@ Sequel.migration do
       column :resource, "text"
       column :last_text, "text"
       column :opts, "jsonb", :default=>Sequel::LiteralString.new("'{}'::jsonb")
+      column :enabled, "boolean"
+      column :last_sent_at, "timestamp without time zone"
       
       primary_key [:service, :chat_id]
     end

@@ -46,7 +46,7 @@ class Sender
       sleep 1
     end
 
-    sub.update last_text: nt.values.join("\n")
+    sub.update last_text: nt.values.join("\n"), last_sent_at: Time.now
   end
 
   def next_text subscriber, last_text
