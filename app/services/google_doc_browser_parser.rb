@@ -57,10 +57,8 @@ class GoogleDocBrowserParser < BaseParser
       break i = _i if p.index last_text
     end
 
-    lp = paras[i]
-
     SymMash.new(
-      last:  lp,
+      last:  [paras[i]],
       final: select(paras[(i+1)..-1]),
     )
   end
