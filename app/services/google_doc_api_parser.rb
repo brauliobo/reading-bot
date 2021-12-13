@@ -33,10 +33,11 @@ class GoogleDocApiParser < BaseParser
   def next_text last_text
     return unless paras = lookup_and_parse(last_text)
 
+    original = select(paras.original)
     SymMash.new(
       last:     paras.last,
-      original: select(paras.original),
-      final:    select(paras.final),
+      original: original,
+      final:    paras.final.first(original.size),
     )
   end
 
