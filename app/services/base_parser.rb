@@ -14,8 +14,4 @@ class BaseParser
     Selector.new(opts).select paras
   end
 
-  def report_last lp
-    puts "Found last paragraph: \n#{lp.join "\n\n"}\n\n--------------"
-  end
-
 end

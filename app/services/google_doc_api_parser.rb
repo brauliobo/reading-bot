@@ -33,11 +33,10 @@ class GoogleDocApiParser < BaseParser
   def next_text last_text
     return unless paras = lookup_and_parse(last_text)
 
-    report_last [paras.original.first, paras.final.first]
-
     SymMash.new(
-      original: select(paras.original[1..-1]),
-      final:    select(paras.final[1..-1]),
+      last:     paras.last,
+      original: select(paras.original),
+      final:    select(paras.final),
     )
   end
 
@@ -46,14 +45,15 @@ class GoogleDocApiParser < BaseParser
   def lookup_and_parse last_text
     tables = @document.body.content.map{ |c| c.table }.compact
     tables.each do |t|
-      t.table_rows.each_cons 6 do |r, *others|
+      t.table_rows.each_cons 6 do |r, *nexts|
         content = r.table_cells.map(&:content)
         next unless i = content_find(content, last_text)
 
-        all = [r] + others
+        last = parse_cell(r.table_cells.first) + parse_cell(r.table_cells.second)
         return SymMash.new(
-          original: all.flat_map{ |a| parse_cell a.table_cells.first, i },
-          final:    all.flat_map{ |a| parse_cell a.table_cells.second, i },
+          last:     last,
+          original: nexts.flat_map{ |a| parse_cell a.table_cells.first },
+          final:    nexts.flat_map{ |a| parse_cell a.table_cells.second },
         )
       end
     end

@@ -58,9 +58,9 @@ class GoogleDocBrowserParser < BaseParser
     end
 
     lp = paras[i]
-    report_last lp
 
     SymMash.new(
+      last:  lp,
       final: select(paras[(i+1)..-1]),
     )
   end

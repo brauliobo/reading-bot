@@ -28,8 +28,10 @@ class Sender
 
   def send chat_id, last_text = nil
     sub = self.class.load_subscriber chat_id
-
     nt  = next_text sub, last_text
+
+    puts "Found last paragraph: \n#{nt.last.join "\n\n"}\n\n--------------"
+    nt.except! :last
     return puts "Can't find next! #{nt.inspect}" if nt.blank? or nt.final.blank?
 
     fnt = nt.flat_map do |order, paras|
@@ -43,6 +45,7 @@ class Sender
       Whatsapp.send_message sub.chat_id, fnp
       sleep 1
     end
+
     sub.update last_text: nt.values.join("\n")
   end
 
