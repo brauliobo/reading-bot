@@ -47,43 +47,37 @@ class GoogleDocApiParser < BaseParser
     tables = @document.body.content.map{ |c| c.table }.compact
     tables.each do |t|
       t.table_rows.each_cons 6 do |r, *nexts|
-        content = r.table_cells.map(&:content)
-        next unless i = content_find(content, last_text)
+        next unless cells_find(r.table_cells, last_text)
 
-        last = parse_cell(r.table_cells.first) + parse_cell(r.table_cells.second)
+        last = parse_content(r.table_cells.first) + parse_content(r.table_cells.second)
         return SymMash.new(
           last:     last,
-          original: nexts.flat_map{ |a| parse_cell a.table_cells.first },
-          final:    nexts.flat_map{ |a| parse_cell a.table_cells.second },
+          original: nexts.flat_map{ |a| parse_content a.table_cells.first },
+          final:    nexts.flat_map{ |a| parse_content a.table_cells.second },
         )
       end
     end
     nil
   end
 
-  def parse_cell cl, i = 0
-    elements = cl.content.flat_map{ |c| c.paragraph.elements }
-    elements = elements[i..-1]
-
-    paras = elements.map do |e|
-      e.text_run.content.strip
-    end
-    paras.reject!{ |p| p.blank? }
-    paras
-  end
-
   ##
   # Return the index of the paragraph found in `content`
   #
-  def content_find cells_content, last_text
-    cells_content.each do |content|
-      elements = content.flat_map{ |c| c.paragraph.elements }
-      elements.each.with_index do |e, i|
-        next unless e.text_run
-        return i if e.text_run.content.index last_text
-      end
+  def cells_find cells, last_text
+    cells.each do |cell|
+      content = parse_content(cell).join
+      return true if content.index last_text
     end
     false
+  end
+
+  def parse_content el
+    paras = el.content.flat_map{ |c| c.paragraph }
+    paras.map! do |p|
+      p.elements.map{ |e| e.text_run&.content&.strip }.join
+    end
+    paras.reject!{ |p| p.blank? }
+    paras
   end
 
 end

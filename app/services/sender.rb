@@ -13,6 +13,7 @@ class Sender
     GoogleDocApiParser.load
 
     Subscriber.where(enabled: true).all.peach do |s, h|
+      puts "#{s.name}: loading resource"
       subscribers[s.chat_id] = s.tap{ s.parse }
     end
   end
@@ -30,9 +31,11 @@ class Sender
     sub = self.class.load_subscriber chat_id
     nt  = next_text sub, last_text
 
+    return puts "Can't find last! #{nt.inspect}" if nt.blank? or nt.last.blank?
     puts "Found last paragraph: \n#{nt.last.join "\n\n"}\n\n--------------"
     nt.except! :last
-    return puts "Can't find next! #{nt.inspect}" if nt.blank? or nt.final.blank?
+
+    return puts "Can't find next! #{nt.inspect}" if nt.final.blank?
 
     fnt = nt.flat_map do |order, paras|
       fp = format paras
