@@ -27,19 +27,21 @@ class Sender
     end
   end
 
+  SECTION_SEP = "\n--------------\n"
+
   def send chat_id, last_text = nil
     sub = self.class.load_subscriber chat_id
     nt  = next_text sub, last_text
 
-    return puts "Can't find last! #{nt.inspect}" if nt.blank? or nt.last.blank?
-    puts "Found last paragraph: \n#{nt.last.join "\n\n"}\n\n--------------"
+    return puts "#{sub.name}: can't find last! #{nt.inspect}" if nt.blank? or nt.last.blank?
+    puts "Found last paragraph: \n#{nt.last.join "\n\n"}#{SECTION_SEP}"
     nt.except! :last
 
-    return puts "Can't find next! #{nt.inspect}" if nt.final.blank?
+    return puts "#{sub.name}: can't find next! #{nt.inspect}" if nt.final.blank?
 
     fnt = nt.flat_map do |order, paras|
       fp = format paras
-      puts "Next #{order} text to post:\n#{fp}"
+      puts "#{sub.name}: next #{order} text to post:\n#{fp}#{SECTION_SEP}"
       fp
     end
 
