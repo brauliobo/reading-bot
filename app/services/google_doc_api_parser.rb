@@ -30,11 +30,10 @@ class GoogleDocApiParser < BaseParser
     @document = self.class.service.get_document resource
   end
 
-  def next_text last_text
-    return unless paras = lookup_and_parse(last_text)
+  def next_text last_paras
+    return unless paras = lookup_and_parse(last_paras)
 
     original = select(paras.original)
-    require'pry';binding.pry
     SymMash.new(
       last:     paras.last,
       original: original,
@@ -44,11 +43,15 @@ class GoogleDocApiParser < BaseParser
 
   protected
 
-  def lookup_and_parse last_text
+  def lookup_and_parse last_paras
     tables = @document.body.content.map{ |c| c.table }.compact
     tables.each do |t|
-      t.table_rows.each_cons 6 do |r, *nexts|
-        next unless cells_find(r.table_cells, last_text)
+      t.table_rows.each_cons 6 do |pr, r, *nexts|
+        paras = [pr, r]
+        ret   = last_paras.zip(paras).map.with_index do |(lp, cr), i|
+          cells_find cr.table_cells, lp
+        end
+        next unless ret.all?
 
         last = parse_content(r.table_cells.first) + parse_content(r.table_cells.second)
         return SymMash.new(

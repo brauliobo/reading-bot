@@ -56,10 +56,14 @@ class Sender
   end
 
   def next_text subscriber, last_text
-    last_text ||= subscriber.last_text.split("\n").last
-    last_text   = last_text.last 100 # ending of the text
+    last_paras = if last_text then [last_text] else last_paras subscriber end
 
-    subscriber.parsed.next_text last_text
+    subscriber.parsed.next_text last_paras
+  end
+
+  def last_paras sub
+    # only last parameter could be a date (not enough)
+    sub.last_text.split("\n").last(2)
   end
 
   def format paras

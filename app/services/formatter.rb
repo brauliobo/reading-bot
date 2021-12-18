@@ -9,7 +9,7 @@ class Formatter
 
       if p.size < Selector::HEADING_LIMIT
         p = "*#{p}*"
-      elsif (ih = p.index ':') < Selector::HEADING_LIMIT
+      elsif (ih = p.index ':') and ih < Selector::HEADING_LIMIT
         p.insert 0, '*'
         p.insert ih+1, '*'
       end

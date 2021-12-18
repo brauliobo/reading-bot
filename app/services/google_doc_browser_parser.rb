@@ -39,7 +39,8 @@ class GoogleDocBrowserParser < BaseParser
     @sections = @parsed.css('script:contains("DOCS_modelChunkLoadStart")')
   end
 
-  def next_text last_text
+  def next_text last_paras
+    last_text = last_paras.last
     sec,nsec  = nil
     sections.each_cons 2 do |_sec, _nsec|
       next unless _sec.text.index last_text
