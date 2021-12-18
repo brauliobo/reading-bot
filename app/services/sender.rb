@@ -33,8 +33,9 @@ class Sender
     sub = self.class.load_subscriber chat_id
     nt  = next_text sub, last_text
 
+    puts "\n\n"
     return puts "#{sub.name}: can't find last! #{nt.inspect}" if nt.blank? or nt.last.blank?
-    puts "Found last paragraph: \n#{nt.last.join "\n\n"}#{SECTION_SEP}"
+    puts "#{sub.name}: found last paragraph: \n#{nt.last.join "\n\n"}#{SECTION_SEP}"
     nt.except! :last
 
     return puts "#{sub.name}: can't find next! #{nt.inspect}" if nt.final.blank?

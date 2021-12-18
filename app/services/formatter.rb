@@ -6,7 +6,14 @@ class Formatter
     paras.map do |p|
       p.strip!
       p = "_#{p}_"
-      p = "*#{p}*" if p.size < Selector::HEADING_LIMIT
+
+      if p.size < Selector::HEADING_LIMIT
+        p = "*#{p}*"
+      elsif (ih = p.index ':') < Selector::HEADING_LIMIT
+        p.insert 0, '*'
+        p.insert ih+1, '*'
+      end
+
       p
     end.join LINE_SEP
   end

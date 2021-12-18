@@ -34,6 +34,7 @@ class GoogleDocApiParser < BaseParser
     return unless paras = lookup_and_parse(last_text)
 
     original = select(paras.original)
+    require'pry';binding.pry
     SymMash.new(
       last:     paras.last,
       original: original,
