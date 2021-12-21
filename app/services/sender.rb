@@ -36,17 +36,20 @@ class Sender
     puts "\n\n"
     return puts "#{sub.name}: can't find last! #{nt.inspect}" if nt.blank? or nt.last.blank?
     puts "#{sub.name}: found last paragraph: \n#{nt.last.join "\n\n"}#{SECTION_SEP}"
-    nt.except! :last
+    nt.delete :last
 
     return puts "#{sub.name}: can't find next! #{nt.inspect}" if nt.final.blank?
 
-    fnt = nt.flat_map do |order, paras|
-      fp = format paras
-      puts "#{sub.name}: next #{order} text to post:\n#{fp}#{SECTION_SEP}"
-      fp
-    end
+    begin
+      fnt = format sub, nt
+      c   = command "#{sub.name}: confirm post?"
+      case c
+      when 'n' then return
+      when 'y' then break
+      when /o(\d)/ then nt.each{ |_,o| o.shift ($1 || 1).to_i }
+      end
+    end while true
 
-    return unless confirm_yn "#{sub.name}: confirm post?"
     fnt.each do |fnp|
       Whatsapp.send_message sub.chat_id, fnp
       sleep 1
@@ -66,8 +69,12 @@ class Sender
     sub.last_text.split("\n").last(2)
   end
 
-  def format paras
-    Formatter.new.md paras
+  def format sub, nt
+    nt.flat_map do |order, paras|
+      fp = Formatter.new.md paras
+      puts "#{sub.name}: next #{order} text to post:\n#{fp}#{SECTION_SEP}"
+      fp
+    end
   end
 
   def send_all last_text
@@ -76,9 +83,9 @@ class Sender
     end
   end
 
-  def confirm_yn question
-    puts "\n#{question} (yN)"
-    return true if STDIN.gets.chomp == 'y'
+  def command question
+    puts "\n#{question} (yNo)"
+    STDIN.gets.chomp.downcase
   end
 
 end
