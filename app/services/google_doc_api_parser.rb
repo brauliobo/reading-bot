@@ -47,11 +47,13 @@ class GoogleDocApiParser < BaseParser
     tables = @document.body.content.map{ |c| c.table }.compact
     tables.each do |t|
       t.table_rows.each_cons 6 do |pr, r, *nexts|
-        paras = [pr, r]
-        ret   = last_paras.zip(paras).map.with_index do |(lp, cr), i|
-          cells_find cr.table_cells, lp
+        ret = last_paras.zip([pr, r]).map.with_index do |(lp, cr), i|
+          found = cells_find cr.table_cells, lp
+          r = pr unless found
+          found
         end
         next unless ret.all?
+        nexts.prepend(r) and r = pr if last_paras.size == 1
 
         last = parse_content(r.table_cells.first) + parse_content(r.table_cells.second)
         return SymMash.new(
