@@ -9,12 +9,15 @@ class Selector
     @opts = opts
   end
 
+  def self.disable_heading? paras
+    paras.count{ |p| p.size < HEADING_LIMIT } >= 4
+  end
+
   def select paras
     nt = []
     hi = -1
 
-    for i in 0..4 do
-      break unless p = paras[i]
+    paras.each.with_index do |p, i|
       break if i > hi+1 and nt.join.size + p.size > CHARS_LIMIT
       np = paras[i+1]
       # stop if there is a heading in the middle
@@ -24,7 +27,7 @@ class Selector
       nt << p
     end
 
-    nt.pop if nt.last.size < HEADING_LIMIT
+    nt.pop if !Selector.disable_heading?(paras) and nt.last.size < HEADING_LIMIT
 
     nt
   end

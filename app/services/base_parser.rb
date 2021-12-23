@@ -1,5 +1,7 @@
 class BaseParser
 
+  NEXT_LIMIT = 10
+
   attr_reader :resource, :opts
 
   def initialize resource, opts = SymMash.new

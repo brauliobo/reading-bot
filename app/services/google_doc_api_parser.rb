@@ -46,14 +46,14 @@ class GoogleDocApiParser < BaseParser
   def lookup_and_parse last_paras
     tables = @document.body.content.map{ |c| c.table }.compact
     tables.each do |t|
-      t.table_rows.each_cons 6 do |pr, r, *nexts|
-        ret = last_paras.zip([pr, r]).map.with_index do |(lp, cr), i|
-          found = cells_find cr.table_cells, lp
-          r = pr unless found
-          found
+      t.table_rows.each_cons NEXT_LIMIT do |pr, r, *nexts|
+        found = last_paras.zip([pr, r]).find do |lp, cr|
+          cr if cells_find cr.table_cells, lp
         end
-        next unless ret.all?
-        nexts.prepend(r) and r = pr if last_paras.size == 1
+        # look for joined content (poetry's case)
+        found = r if !found and cells_find r.table_cells, last_paras.join
+        next unless found
+        nexts.prepend(r) and r = pr if found == pr and last_paras.size == 1
 
         last = parse_content(r.table_cells.first) + parse_content(r.table_cells.second)
         return SymMash.new(
