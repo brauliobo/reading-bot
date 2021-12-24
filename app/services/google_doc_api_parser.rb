@@ -47,8 +47,8 @@ class GoogleDocApiParser < BaseParser
     tables = @document.body.content.map{ |c| c.table }.compact
     tables.each do |t|
       t.table_rows.each_cons NEXT_LIMIT do |pr, r, *nexts|
-        found = last_paras.zip([pr, r]).find do |lp, cr|
-          cr if cells_find cr.table_cells, lp
+        found = last_paras.zip([pr, r]).detect do |lp, cr|
+          break cr if cells_find cr.table_cells, lp
         end
         # look for joined content (poetry's case)
         found = r if !found and cells_find r.table_cells, last_paras.join

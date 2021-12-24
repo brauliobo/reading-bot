@@ -6,7 +6,7 @@ class Formatter
     disable_heading = Selector.disable_heading? paras
 
     paras.map do |p|
-      p.strip!
+      p = p.dup
 
       if !disable_heading and p.size < Selector::HEADING_LIMIT
         p = "*#{p}*"
