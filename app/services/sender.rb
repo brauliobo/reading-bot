@@ -21,7 +21,7 @@ class Sender
   def initialize
   end
 
-  def send_enabled
+  def send_enabled update: false
     subscribers.each do |chat_id, sub|
       send chat_id
     end
@@ -29,8 +29,9 @@ class Sender
 
   SECTION_SEP = "\n--------------\n"
 
-  def send chat_id, last_text = nil
+  def send chat_id, last_text: nil, update: false
     sub = self.class.load_subscriber chat_id
+    sub.update_content if update
     nt  = next_text sub, last_text
 
     puts "\n\n"
@@ -43,7 +44,7 @@ class Sender
     begin
       fnt = format sub, nt
       c   = command "#{sub.name}: confirm post?"
-      case c
+      case c.downcase
       when 'n' then return
       when 'y' then break
       when /o(\d)/ then nt.each{ |_,o| o.shift ($1 || 1).to_i }
@@ -66,7 +67,7 @@ class Sender
 
   def last_paras sub
     # only last parameter could be a date (not enough)
-    sub.last_text.split("\n").last(2)
+    sub.last_sent.text.split("\n").last(2)
   end
 
   def format sub, nt

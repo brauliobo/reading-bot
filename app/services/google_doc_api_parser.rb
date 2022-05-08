@@ -25,57 +25,27 @@ class GoogleDocApiParser < BaseParser
 
   attr_reader :document
 
-  def initialize resource, opts = SymMash.new
+  def initialize subscriber, opts = SymMash.new
     super
-    @document = self.class.service.get_document resource
   end
 
-  def next_text last_paras
-    return unless paras = lookup_and_parse(last_paras)
-
-    original = select(paras.original)
-    SymMash.new(
-      last:     paras.last,
-      original: original,
-      final:    paras.final.first(original.size),
-    )
+  def document
+    @document ||= self.class.service.get_document resource
   end
 
-  protected
-
-  def lookup_and_parse last_paras
-    tables = @document.body.content.map{ |c| c.table }.compact
-    tables.each do |t|
-      t.table_rows.each_cons NEXT_LIMIT do |pr, r, *nexts|
-        found = last_paras.zip([pr, r]).detect do |lp, cr|
-          break cr if cells_find cr.table_cells, lp
-        end
-        # look for joined content (poetry's case)
-        found = r if !found and cells_find r.table_cells, last_paras.join
-        next unless found
-        nexts.prepend(r) and r = pr if found == pr and last_paras.size == 1
-
-        last = parse_content(r.table_cells.first) + parse_content(r.table_cells.second)
-        return SymMash.new(
-          last:     last,
-          original: nexts.flat_map{ |a| parse_content a.table_cells.first },
-          final:    nexts.flat_map{ |a| parse_content a.table_cells.second },
+  def updated_content
+    tables = document.body.content.map{ |c| c.table }.compact
+    tables.flat_map do |t|
+      t.table_rows.map do |r|
+        SymMash.new(
+          original: parse_content(r.table_cells.first),
+          final:    parse_content(r.table_cells.second),
         )
       end
     end
-    nil
   end
 
-  ##
-  # Return the index of the paragraph found in `content`
-  #
-  def cells_find cells, last_text
-    cells.each do |cell|
-      content = parse_content(cell).join
-      return true if content.index last_text
-    end
-    false
-  end
+  protected
 
   def parse_content el
     paras = el.content.flat_map{ |c| c.paragraph }

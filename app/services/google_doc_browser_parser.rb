@@ -27,6 +27,21 @@ class GoogleDocBrowserParser < BaseParser
     reload
   end
 
+  def updated_content
+    @sections.each.with_object [] do |sec, a|
+      paras = parse_sec sec
+      next if paras.blank?
+      paras.squish.split("\n").each do |p|
+        next if p.blank?
+        a << SymMash.new(
+          final: [p],
+        )
+      end
+    end
+  end
+
+  protected
+
   def load_page
     @page = browser.new_page.tap do |p|
       p.default_navigation_timeout = 60_000
@@ -39,35 +54,9 @@ class GoogleDocBrowserParser < BaseParser
     @sections = @parsed.css('script:contains("DOCS_modelChunkLoadStart")')
   end
 
-  def next_text last_paras
-    last_text = last_paras.last
-    sec,nsec  = nil
-    sections.each_cons 2 do |_sec, _nsec|
-      next unless _sec.text.index last_text
-      sec  = parse_sec _sec
-      nsec = parse_sec _nsec
-      break
-    end
-    return puts "Can't find paragraph" if sec.blank?
-    paras = sec.split("\n") + nsec.split("\n")
-
-    nt = nil
-    i  = nil
-    paras.reject!{ |p| p.blank? }
-    paras.each.with_index do |p, _i|
-      break i = _i if p.index last_text
-    end
-
-    SymMash.new(
-      last:  [paras[i]],
-      final: select(paras[(i+1)..-1]),
-    )
-  end
-
-  protected
-
   def parse_sec sec
-    sec = sec.text.match(/= (.*); DOCS_modelChunkLoadStart/).captures.first
+    sec = sec.text.match(/= (.*); DOCS_modelChunkLoadStart/)&.captures&.first
+    return unless sec
     sec = JSON.parse sec
     sec = Hashie::Mash.new sec.first
     sec.s

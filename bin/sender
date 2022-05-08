@@ -7,10 +7,12 @@ require_relative '../config/environment'
 ENV['CHAT_ID'] = Subscriber.find(Sequel.like :name, "%#{ENV['CHAT_NAME']}%")&.chat_id if ENV['CHAT_NAME']
 
 sender = Sender.new
+update = ENV['UPDATE']&.in? %w[1 true]
+
 if chat_id = ENV['CHAT_ID']
-  sender.send ENV['CHAT_ID'], ARGV[0]
+  sender.send ENV['CHAT_ID'], last_text: ARGV[0], update: update
 else
   Sender.load_all
-  sender.send_enabled
+  sender.send_enabled update: update
 end
 
