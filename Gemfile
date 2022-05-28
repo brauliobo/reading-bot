@@ -21,6 +21,8 @@ gem 'sequel-rails'
 gem 'devise'
 gem 'activeadmin'
 
+gem 'rufus-scheduler'
+
 gem 'execjs'
 
 gem 'puma', '~> 5.0'

@@ -81,7 +81,7 @@ GEM
     builder (3.2.4)
     byebug (11.1.3)
     coderay (1.1.3)
-    concurrent-ruby (1.1.9)
+    concurrent-ruby (1.1.10)
     crass (1.0.6)
     declarative (0.0.20)
     devise (4.8.0)
@@ -95,6 +95,8 @@ GEM
       dotenv (= 2.7.6)
       railties (>= 3.2)
     erubi (1.10.0)
+    et-orbi (1.2.7)
+      tzinfo
     execjs (2.8.1)
     faraday (1.8.0)
       faraday-em_http (~> 1.0)
@@ -119,6 +121,9 @@ GEM
     formtastic (4.0.0)
       actionpack (>= 5.2.0)
     formtastic_i18n (0.7.0)
+    fugit (1.5.3)
+      et-orbi (~> 1, >= 1.2.7)
+      raabro (~> 1.4)
     gems (1.2.0)
     globalid (1.0.0)
       activesupport (>= 5.0)
@@ -214,6 +219,7 @@ GEM
       concurrent-ruby (~> 1.1.0)
       mime-types (>= 3.0)
       websocket-driver (>= 0.6.0)
+    raabro (1.4.0)
     racc (1.6.0)
     rack (2.2.3)
     rack-mini-profiler (2.3.3)
@@ -266,6 +272,8 @@ GEM
     retriable (3.1.2)
     rexml (3.2.5)
     ruby2_keywords (0.0.5)
+    rufus-scheduler (3.8.1)
+      fugit (~> 1.1, >= 1.1.6)
     sass-rails (6.0.0)
       sassc-rails (~> 2.1, >= 2.1.1)
     sassc (2.4.0)
@@ -341,6 +349,7 @@ DEPENDENCIES
   puppeteer-ruby
   rack-mini-profiler (~> 2.0)
   rails (~> 6.1.4, >= 6.1.4.1)
+  rufus-scheduler
   sass-rails (>= 6)
   sequel-rails
   spring
