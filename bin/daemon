@@ -2,5 +2,8 @@
 
 require_relative '../config/environment'
 
+Whatsapp.venom_start
+ControlApi.launch
 Scheduler.run
 
+sleep 365.days while true

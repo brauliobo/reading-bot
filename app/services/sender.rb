@@ -15,6 +15,7 @@ class Sender
     GoogleDocBrowserParser.load
     GoogleDocApiParser.load
 
+    self.subscribers = {}
     Subscriber.where(enabled: true).all.peach do |s, h|
       puts "#{s.name}: loading resource"
       subscribers[s.chat_id] = s.tap{ s.parse }

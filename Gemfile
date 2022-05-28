@@ -25,6 +25,7 @@ gem 'rufus-scheduler'
 
 gem 'execjs'
 
+gem 'roda'
 gem 'puma', '~> 5.0'
 
 group :development, :test do
