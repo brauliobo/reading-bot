@@ -47,7 +47,6 @@ class Sender
 
     fnt = format nt.next
     fnt.each{ |fp| puts "#{sub.name}: next text to post:\n#{fp}#{SECTION_SEP}" }
-    pp nt
 
     return unless confirm sub, nt unless noconfirm
     return puts "#{sub.name}: dry run, quiting" if dry
@@ -56,7 +55,7 @@ class Sender
       Whatsapp.send_message sub.chat_id, fnp
       sleep 1
     end
-    sub.update last_sent: {index: nt.last.index, text: nt.values.join("\n")}, last_sent_at: Time.now
+    sub.update last_sent: {index: nt.last.index + nt.next.final.values.size, text: nt.next.values.join("\n")}, last_sent_at: Time.now
   end
 
   protected

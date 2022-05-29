@@ -8,7 +8,7 @@ class Whatsapp
     Thread.new do
       while !@stop
         pid = spawn 'node venom.js'
-        trap(:SIGINT) { Process.kill pid; @stop = true }
+        trap(:SIGINT) { Process.kill :INT, pid; @stop = true }
 
         Process.waitpid pid
         puts 'venom: restarting'
