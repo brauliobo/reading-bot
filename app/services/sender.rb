@@ -47,16 +47,25 @@ class Sender
     nt.delete :last
     return puts "#{sub.name}: can't find next! #{nt.inspect}" if nt.final.blank?
 
+    fnt = format sub, nt
     return unless confirm sub, nt unless noconfirm
     return puts "#{sub.name}: dry run, quiting" if dry
 
-    fnt = format sub, nt
     fnt.each do |fnp|
       Whatsapp.send_message sub.chat_id, fnp
       sleep 1
     end
-
     sub.update last_sent: {text: nt.values.join("\n")}, last_sent_at: Time.now
+  end
+
+  protected
+
+  def format sub, nt
+    nt.flat_map do |order, paras|
+      fp = Formatter.new.md paras
+      puts "#{sub.name}: next #{order} text to post:\n#{fp}#{SECTION_SEP}"
+      fp
+    end
   end
 
   def next_text subscriber, last_text
@@ -71,7 +80,6 @@ class Sender
       case c.downcase
       when 'n' then return false
       when 'y' then return true
-      when /o(\d)/ then nt.each{ |_,o| o.shift ($1 || 1).to_i }
       end
     end while true
   end
@@ -79,20 +87,6 @@ class Sender
   def last_paras sub
     # only last parameter could be a date (not enough)
     sub.last_sent.text.split("\n").last(2)
-  end
-
-  def format sub, nt
-    nt.flat_map do |order, paras|
-      fp = Formatter.new.md paras
-      puts "#{sub.name}: next #{order} text to post:\n#{fp}#{SECTION_SEP}"
-      fp
-    end
-  end
-
-  def send_all last_text
-    pages.each do |s, p|
-      send s.chat_id, last_text
-    end
   end
 
   def command question
