@@ -24,8 +24,13 @@ class Subscriber < Sequel::Model
     SymMash.new self[:opts]
   end
 
+  def next_text last_text
+    last_paras = if last_text then [last_text] else self.last_paras end
+    parse.next_text last_paras
+  end
+
   def lookup last_paras
-    content.each_cons NEXT_LIMIT do |pr, r, *nexts|
+    content.each_cons(NEXT_LIMIT).with_index do |(pr, r, *nexts), i|
       sized_last = if last_paras.size == 1 then last_paras *= 2 else last_paras end
       found = [pr, r].zip(sized_last).find do |cr, lp|
         row_find cr, lp
@@ -35,12 +40,15 @@ class Subscriber < Sequel::Model
       next unless found
       nexts.prepend(r) and r = pr if found == pr and last_paras.size == 1
 
-      ret = SymMash.new(
-        last:  r,
-        final: nexts.flat_map(&:final),
+      return SymMash.new(
+        last: r.merge(
+          index: i+1,
+        ),
+        next: {
+          original: (nexts.flat_map(&:original) if nexts.first.original),
+          final:    nexts.flat_map(&:final),
+        }
       )
-      ret.original = nexts.flat_map(&:original) if nexts.first.original
-      return ret
     end
     nil
   end
@@ -57,6 +65,11 @@ class Subscriber < Sequel::Model
 
     return true if cells.index last_text
     false
+  end
+
+  def last_paras 
+    # only last parameter could be a date (not enough)
+    last_sent.text.split("\n").last(2)
   end
 
 end

@@ -39,15 +39,16 @@ class Sender
   def send chat_id, last_text: nil, update: false, noconfirm: !self.interactive
     sub = self.class.load_subscriber chat_id
     sub.update_content if update
-    nt  = next_text sub, last_text
+    nt  = sub.next_text last_text
 
-    puts "\n\n"
-    return puts "#{sub.name}: can't find last! #{nt.inspect}" if nt.blank? or nt.last.blank?
-    puts "#{sub.name}: found last paragraph: \n#{nt.last.values_at(:original, :final).join "\n\n"}#{SECTION_SEP}"
-    nt.delete :last
-    return puts "#{sub.name}: can't find next! #{nt.inspect}" if nt.final.blank?
+    return puts "#{sub.name}: can't find last! #{nt.inspect}" if nt.blank? or nt.last.final.blank?
+    puts "\n\n#{sub.name}: found last paragraph: \n#{nt.last.values_at(:original, :final).join "\n\n"}#{SECTION_SEP}"
+    return puts "#{sub.name}: can't find next! #{nt.next.inspect}" if nt.next.final.blank?
 
-    fnt = format sub, nt
+    fnt = format nt.next
+    fnt.each{ |fp| puts "#{sub.name}: next text to post:\n#{fp}#{SECTION_SEP}" }
+    pp nt
+
     return unless confirm sub, nt unless noconfirm
     return puts "#{sub.name}: dry run, quiting" if dry
 
@@ -55,23 +56,16 @@ class Sender
       Whatsapp.send_message sub.chat_id, fnp
       sleep 1
     end
-    sub.update last_sent: {text: nt.values.join("\n")}, last_sent_at: Time.now
+    sub.update last_sent: {index: nt.last.index, text: nt.values.join("\n")}, last_sent_at: Time.now
   end
 
   protected
 
-  def format sub, nt
-    nt.flat_map do |order, paras|
-      fp = Formatter.new.md paras
-      puts "#{sub.name}: next #{order} text to post:\n#{fp}#{SECTION_SEP}"
-      fp
+  def format nt
+    nt.each.with_object [] do |(order, paras), l|
+      next unless paras
+      l << Formatter.new.md(paras)
     end
-  end
-
-  def next_text subscriber, last_text
-    last_paras = if last_text then [last_text] else last_paras subscriber end
-
-    subscriber.parsed.next_text last_paras
   end
 
   def confirm sub, nt
@@ -82,11 +76,6 @@ class Sender
       when 'y' then return true
       end
     end while true
-  end
-
-  def last_paras sub
-    # only last parameter could be a date (not enough)
-    sub.last_sent.text.split("\n").last(2)
   end
 
   def command question

@@ -16,12 +16,10 @@ class BaseParser
   end
 
   def next_text last_paras
-    return unless paras = lookup(last_paras)
+    return unless nt = lookup(last_paras)
 
-    final       = select paras.final
-    nt          = SymMash.new last: paras.last
-    nt.original = paras.original.first final.size if paras.original
-    nt.final    = final
+    nt.next.final    = select nt.next.final
+    nt.next.original = nt.next.original.first nt.next.final.size if nt.next.original
     nt
   end
 
