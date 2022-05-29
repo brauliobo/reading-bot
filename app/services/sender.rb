@@ -3,6 +3,9 @@ class Sender
   class_attribute :dry
   self.dry = !!ENV['DRY']
 
+  class_attribute :interactive
+  self.interactive = true
+
   class_attribute :subscribers
   self.subscribers = {}
 
@@ -33,7 +36,7 @@ class Sender
 
   SECTION_SEP = "\n--------------\n"
 
-  def send chat_id, last_text: nil, update: false, noconfirm: false
+  def send chat_id, last_text: nil, update: false, noconfirm: !self.interactive
     sub = self.class.load_subscriber chat_id
     sub.update_content if update
     nt  = next_text sub, last_text

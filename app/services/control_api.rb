@@ -9,6 +9,17 @@ class ControlApi
   class App < Roda
     route do |r|
       r.on 'scheduler' do
+        r.get 'dry_enable' do
+          Sender.dry = true
+        end
+        r.get 'dry_disable' do
+          Sender.dry = false
+        end
+
+        r.get 'send_enabled' do
+          Sender.new.send_enabled
+          'sent'
+        end
         r.get 'reload' do
           Scheduler.reload
           'finished'
