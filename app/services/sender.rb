@@ -55,7 +55,7 @@ class Sender
       Whatsapp.send_message sub.chat_id, fnp
       sleep 1
     end
-    sub.update last_sent: {index: nt.last.index + nt.next.final.values.size, text: nt.next.values.join("\n")}, last_sent_at: Time.now
+    sub.update last_sent: {index: nt.last.index + nt.next.final.size, text: nt.next.values.join("\n")}, last_sent_at: Time.now
   end
 
   protected
