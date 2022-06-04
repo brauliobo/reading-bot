@@ -31,7 +31,7 @@ class GoogleDocBrowserParser < BaseParser
     @sections.each.with_object [] do |sec, a|
       paras = parse_sec sec
       next if paras.blank?
-      paras = paras.split("\n").select(&:presence)
+      paras = paras.split("\n").map(&:strip).select(&:presence)
       paras.each do |p|
         next if p.blank?
         a << SymMash.new(

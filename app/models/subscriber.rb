@@ -41,14 +41,15 @@ class Subscriber < Sequel::Model
       next unless found
       nexts.prepend(r) and r = pr if found == pr and last_paras.size == 1
 
+      nexth = SymMash.new
+      nexth.original = nexts.flat_map(&:original) if nexts.first.original
+      nexth.final    = nexts.flat_map(&:final)
+
       return SymMash.new(
         last: r.merge(
           index: i+1,
         ),
-        next: {
-          original: (nexts.flat_map(&:original) if nexts.first.original),
-          final:    nexts.flat_map(&:final),
-        }
+        next: nexth,
       )
     end
     nil

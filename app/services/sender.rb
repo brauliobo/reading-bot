@@ -54,7 +54,7 @@ class Sender
     fnt.each do |fnp|
       Whatsapp.send_message sub.chat_id, fnp
       sleep 1
-    end
+    end unless ENV['SKIP_SEND']
     sub.update last_sent: {index: nt.last.index + nt.next.final.size, text: nt.next.values.join("\n")}, last_sent_at: Time.now
   end
 
