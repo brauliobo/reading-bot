@@ -25,6 +25,7 @@ class Subscriber < Sequel::Model
   end
 
   def next_text last_text
+    reload # important and senders outside the daemon might have been triggered
     last_paras = if last_text then [last_text] else self.last_paras end
     parse.next_text last_paras
   end
