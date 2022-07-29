@@ -34,9 +34,9 @@ class GoogleDocBrowserParser < BaseParser
       paras = paras.split("\n").map(&:strip).select(&:presence)
       paras.each do |p|
         next if p.blank?
-        a << SymMash.new(
-          final: [p],
-        )
+        next if !p.match(/\w/)
+
+        a << SymMash.new(final: [p])
       end
     end
   end

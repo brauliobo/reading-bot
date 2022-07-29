@@ -2,6 +2,7 @@ require_relative 'boot'
 
 require 'rails/all'
 
+require 'pry'
 require_relative '../lib/sym_mash'
 require_relative '../lib/peach'
 

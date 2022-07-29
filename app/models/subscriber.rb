@@ -2,10 +2,10 @@ class Subscriber < Sequel::Model
 
   NEXT_LIMIT = 10
 
-  attr_accessor :parsed
+  attr_reader :parsed
 
   def parse
-    @parsed ||= self.parser.constantize.new self, opts
+    @parsed ||= parser.constantize.new self, opts
   end
 
   def content
@@ -24,10 +24,15 @@ class Subscriber < Sequel::Model
     SymMash.new self[:opts]
   end
 
-  def next_text last_text
-    reload # important and senders outside the daemon might have been triggered
-    last_paras = if last_text then [last_text] else self.last_paras end
-    parse.next_text last_paras
+  def next_text last_sent = self.last_sent
+    # only last parameter could be a date (not enough)
+    paras = last_sent.text.split("\n").last(2) if last_sent
+    return unless nt = lookup(paras)
+
+    nt.last          = last_sent
+    nt.next.final    = select nt.next.final
+    nt.next.original = nt.next.original.first nt.next.final.size if nt.next.original
+    nt
   end
 
   def lookup last_paras
@@ -55,6 +60,37 @@ class Subscriber < Sequel::Model
     nil
   end
 
+  def md_format nt
+    Formatter.md_format nt
+  end
+  def select paras
+    Selector.new(opts).select paras
+  end
+
+  def test **params
+    bak       = self.values.slice :last_sent, :last_sent_at
+    last_sent = self.last_sent
+    while prev = last_sent
+      nt = next_text last_sent
+      last_sent = next_update nt
+
+      binding.pry unless last_sent and last_sent.index
+      puts "LAST: #{last_sent.merge(text: last_sent.text.first(50)).inspect}"
+
+      binding.pry if prev and prev.index > last_sent.index
+    end
+  ensure
+    puts "Restoring: #{bak.inspect}"
+    update bak
+  end
+
+  def next_update nt
+    last_sent = SymMash.new index: nt.last.index + nt.next.final.size, text: nt.next.values.join("\n")
+    last_sent.tap{ update last_sent: last_sent, last_sent_at: Time.now }
+  end
+
+protected
+
   ##
   # Return the index of the paragraph found in `content`
   #
@@ -67,11 +103,6 @@ class Subscriber < Sequel::Model
 
     return true if cells.index last_text
     false
-  end
-
-  def last_paras 
-    # only last parameter could be a date (not enough)
-    last_sent.text.split("\n").last(2)
   end
 
 end

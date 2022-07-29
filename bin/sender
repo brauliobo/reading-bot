@@ -10,7 +10,11 @@ sender = Sender.new
 update = ENV['UPDATE']&.in? %w[1 true]
 
 if chat_id = ENV['CHAT_ID']
-  sender.send ENV['CHAT_ID'], last_text: ARGV[0], update: update
+  if ENV['TEST']
+    sender.test ENV['CHAT_ID'], last_text: ARGV[0], update: update
+  else
+    sender.send ENV['CHAT_ID'], last_text: ARGV[0], update: update
+  end
 else
   Sender.load_all
   sender.send_enabled update: update

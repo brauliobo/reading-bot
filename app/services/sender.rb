@@ -36,8 +36,11 @@ class Sender
 
   SECTION_SEP = "\n--------------\n"
 
-  def send chat_id, last_text: nil, update: false, noconfirm: !self.interactive
+  def send chat_id, last_text: nil, update: false,
+    test: false, dry: !!ENV['SKIP_SEND'], noconfirm: !self.interactive
+
     sub = self.class.load_subscriber chat_id
+    sub.reload # important and senders outside the daemon might have been triggered
     sub.update_content if update
     nt  = sub.next_text last_text
 
@@ -45,27 +48,26 @@ class Sender
     puts "\n\n#{sub.name}: found last paragraph: \n#{nt.last.values_at(:original, :final).join "\n\n"}#{SECTION_SEP}"
     return puts "#{sub.name}: can't find next! #{nt.next.inspect}" if nt.next.final.blank?
 
-    fnt = format nt.next
+    fnt = sub.md_format nt.next
     fnt.each{ |fp| puts "#{sub.name}: next text to post:\n#{fp}#{SECTION_SEP}" }
 
-    return unless confirm sub, nt unless noconfirm
     return puts "#{sub.name}: dry run, quiting" if dry
+    return unless confirm sub, nt unless noconfirm
 
     fnt.each do |fnp|
       Whatsapp.send_message sub.chat_id, fnp
       sleep 1
-    end unless ENV['SKIP_SEND']
-    sub.update last_sent: {index: nt.last.index + nt.next.final.size, text: nt.next.values.join("\n")}, last_sent_at: Time.now
+    end unless dry or test
+
+    sub.next_update nt
+  end
+
+  def test chat_id, **params
+    sub = self.class.load_subscriber chat_id
+    sub.test **params
   end
 
   protected
-
-  def format nt
-    nt.each.with_object [] do |(order, paras), l|
-      next unless paras
-      l << Formatter.new.md(paras)
-    end
-  end
 
   def confirm sub, nt
     begin

@@ -2,6 +2,14 @@ class Formatter
 
   LINE_SEP = "\n\n"
 
+  def self.md_format nt
+    i = Formatter.new
+    nt.each.with_object [] do |(order, paras), l|
+      next unless paras
+      l << i.md(paras)
+    end
+  end
+
   def md paras
     disable_heading = Selector.disable_heading? paras
 
