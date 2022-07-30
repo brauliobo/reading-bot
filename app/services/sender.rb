@@ -42,7 +42,7 @@ class Sender
     sub = self.class.load_subscriber chat_id
     sub.reload # important and senders outside the daemon might have been triggered
     sub.update_content if update
-    nt  = sub.next_text last_text
+    nt  = sub.find_next last_text
 
     return puts "#{sub.name}: can't find last! #{nt.inspect}" if nt.blank? or nt.last.final.blank?
     puts "\n\n#{sub.name}: found last paragraph: \n#{nt.last.values_at(:original, :final).join "\n\n"}#{SECTION_SEP}"
@@ -65,6 +65,15 @@ class Sender
   def test chat_id, **params
     sub = self.class.load_subscriber chat_id
     sub.test **params
+  end
+
+  def set_last_from_text  chat_id, text
+    sub = self.class.load_subscriber chat_id
+    sub.set_last_from_text  text
+  end
+  def set_last_from_index chat_id, index
+    sub = self.class.load_subscriber chat_id
+    sub.set_last_from_index index
   end
 
   protected

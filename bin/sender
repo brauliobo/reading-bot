@@ -10,10 +10,14 @@ sender = Sender.new
 update = ENV['UPDATE']&.in? %w[1 true]
 
 if chat_id = ENV['CHAT_ID']
-  if ENV['TEST']
-    sender.test ENV['CHAT_ID'], last_text: ARGV[0], update: update
+  if last = ENV['SET_LAST_TEXT']
+    pp sender.set_last_from_text  chat_id, last
+  elsif last = ENV['SET_LAST_INDEX']&.to_i
+    pp sender.set_last_from_index chat_id, last
+  elsif ENV['TEST']
+    sender.test chat_id, last_text: ARGV[0], update: update
   else
-    sender.send ENV['CHAT_ID'], last_text: ARGV[0], update: update
+    sender.send chat_id, last_text: ARGV[0], update: update
   end
 else
   Sender.load_all
