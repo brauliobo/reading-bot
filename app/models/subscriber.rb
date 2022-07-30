@@ -8,14 +8,12 @@ class Subscriber < Sequel::Model
   def parse
     @parsed ||= parser.constantize.new self, opts
   end
-
+  def update_content
+    update content: parse.updated_content
+  end
   def content
     update_content unless self[:content]
     self[:content].map{ |o| SymMash.new o }
-  end
-
-  def update_content
-    update content: parse.updated_content
   end
 
   def last_sent
@@ -66,19 +64,19 @@ class Subscriber < Sequel::Model
     update bak
   end
 
-  def update_next nt
-    last_sent = SymMash.new index: nt.last.index+nt.last.text.size, size: nt.next.final.size, text: nt.next.final
+  def update_last last_sent
     last_sent.tap{ update last_sent: last_sent, last_sent_at: Time.now }
+  end
+  def update_next nt
+    update_last SymMash.new index: nt.last.index+nt.last.text.size, size: nt.next.final.size, text: nt.next.final
   end
 
   def set_last_from_text text
     nt = lookup_next_text SymMash.new(text: text.split("\n"))
-    last_sent = SymMash.new index: nt.last.index, size: 1, text: [nt.last.final.first]
-    last_sent.tap{ update last_sent: last_sent, last_sent_at: Time.now }
+    update_last SymMash.new index: nt.last.index, size: 1, text: [nt.last.final.first]
   end
   def set_last_from_index index
-    last_sent = SymMash.new index: index, size: 1, text: [content[index].final.first]
-    last_sent.tap{ update last_sent: last_sent, last_sent_at: Time.now }
+    update_last SymMash.new index: index, size: 1, text: [content[index].final.first]
   end
 
 protected
