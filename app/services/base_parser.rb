@@ -15,4 +15,10 @@ class BaseParser
     raise 'updated_content: not implemented'
   end
 
+  def parse_paras paras
+    paras = paras.flat_map{ |p| p&.strip&.split "\n" }
+    paras.reject!{ |p| p.blank? }
+    paras
+  end
+
 end

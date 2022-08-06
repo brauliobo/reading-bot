@@ -2,8 +2,6 @@ class Subscriber < Sequel::Model
   
   class_attribute :p_start
   self.p_start = ENV['START']&.to_i
-  class_attribute :activated_start
-  self.activated_start = !!p_start
 
   LAST_OFFSET = 5
   NEXT_LIMIT  = 10
@@ -50,6 +48,7 @@ class Subscriber < Sequel::Model
     while prev = last_sent
       break puts "FINISHED" if finished?
 
+      p_start = self.p_start # save for later usage, can be changed
       nt = find_next last_sent
       last_sent = update_next nt
 
@@ -58,8 +57,9 @@ class Subscriber < Sequel::Model
       raise "Empty text"           if last_sent.text.blank?
       raise "Same index"           if prev.index == last_sent.index
       raise "Same text"            if prev.text  == last_sent.text
+      next if p_start
       raise "Went before previous" if prev.index >  last_sent.index
-      raise "Skipped text"         if prev.index +  prev[:size] < last_sent.index if !activated_start
+      raise "Skipped text"         if prev.index +  prev[:size] < last_sent.index 
     end
   rescue => e
     puts e.message

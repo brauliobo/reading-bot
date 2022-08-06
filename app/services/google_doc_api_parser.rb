@@ -52,12 +52,14 @@ class GoogleDocApiParser < BaseParser
   protected
 
   def parse_content el
-    paras = el.content.flat_map{ |c| c.paragraph }
-    paras.map! do |p|
-      p.elements.map{ |e| e.text_run&.content&.strip }.join
-    end
-    paras.reject!{ |p| p.blank? }
-    paras
+    parse_paras el.content.flat_map{ |c| c.paragraph.elements.map{ |e| e.text_run&.content } }
+  end
+
+  ##
+  # override to keep table rows not split in lines, so one rows always posted entirely
+  #
+  def parse p
+    p&.strip
   end
 
 end
