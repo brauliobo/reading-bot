@@ -1,7 +1,7 @@
 class Selector
 
   HEADING_LIMIT = 80
-  CHARS_LIMIT   = 800
+  CHARS_LIMIT   = 600
 
   attr_reader :opts
 

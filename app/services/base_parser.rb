@@ -16,9 +16,13 @@ class BaseParser
   end
 
   def parse_paras paras
-    paras = paras.flat_map{ |p| p&.strip&.split "\n" }
+    paras = paras.flat_map{ |p| parse p }
     paras.reject!{ |p| p.blank? }
     paras
+  end
+
+  def parse p
+    p&.strip&.split "\n"
   end
 
 end

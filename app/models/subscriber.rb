@@ -76,9 +76,13 @@ class Subscriber < Sequel::Model
     update_last index: nt.next.index, size: nt.next.final.size, text: nt.next.final
   end
 
+  def last_from_text text
+    text = text.split "\n" if text.is_a? String
+    nt   = lookup_next_text SymMash.new text: text
+    SymMash.new index: nt.last.index, size: 1, text: [nt.last.final.first]
+  end
   def set_last_from_text text
-    nt = lookup_next_text SymMash.new(text: text.split("\n"))
-    update_last index: nt.last.index, size: 1, text: [nt.last.final.first]
+    update_last last_from_text text
   end
   def set_last_from_index index
     update_last index: index, size: 1, text: [content[index].final.first]
@@ -87,6 +91,8 @@ class Subscriber < Sequel::Model
 protected
 
   def select_next nextc, last: self.last_sent
+    last.final ||= last.delete :text
+
     original = nextc.text.flat_map(&:original) if nextc.text.first.original
     final    = nextc.text.flat_map(&:final)
 
@@ -97,14 +103,17 @@ protected
     nt
   end
 
-  def lookup_next_index last_sent = self.last_sent
+  def lookup_next_index last_sent = self.last_sent, from_text: false
     size     = (0 if p_start) || last_sent[:size] || 0
     offset   = p_start        || last_sent.index  || 0
     nstart   = offset + size
     lcontent = self.content[offset..nstart]
     ncontent = self.content[nstart..(nstart+NEXT_LIMIT)]
 
-    raise "next_index: different text" if lcontent.first.final.first != last_sent.text.first if !p_start
+    if lcontent.first.final.first != last_sent.text.first
+      raise "next_index: different text" unless from_text or ENV['FIND_INDEX']
+      return lookup_next_index last_from_text(last_sent.text), from_text: true
+    end if !p_start
     self.p_start = nil if p_start # reset after first usage
 
     nextc = SymMash.new index: nstart, text: ncontent

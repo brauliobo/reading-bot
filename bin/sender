@@ -2,12 +2,15 @@
 
 require_relative '../config/environment'
 
-#Whatsapp.send_message '5511962429421@c.us', '_teste2_'
+#Whatsapp.send_message '5512991564509@c.us', '_teste2_'
 
 ENV['CHAT_ID'] = Subscriber.find(Sequel.like :name, "%#{ENV['CHAT_NAME']}%")&.chat_id if ENV['CHAT_NAME']
 
 sender = Sender.new
-update = ENV['UPDATE']&.in? %w[1 true]
+
+send_params = SymMash.new
+send_params.last_text = ARGV[0] if ARGV[0]
+send_params.update    = ENV['UPDATE']&.in? %w[1 true]
 
 if chat_id = ENV['CHAT_ID']
   if last = ENV['SET_LAST_TEXT']
@@ -15,12 +18,12 @@ if chat_id = ENV['CHAT_ID']
   elsif last = ENV['SET_LAST_INDEX']&.to_i
     pp sender.set_last_from_index chat_id, last
   elsif ENV['TEST']
-    sender.test chat_id, last_text: ARGV[0], update: update
+    sender.test chat_id, **send_params
   else
-    sender.send chat_id, last_text: ARGV[0], update: update
+    sender.send chat_id, **send_params
   end
 else
   Sender.load_all
-  sender.send_enabled update: update
+  sender.send_enabled **send_params
 end
 

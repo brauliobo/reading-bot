@@ -44,13 +44,13 @@ class Sender
     puts "#{sub.name}: send"
 
     sub.update_content if update
-    nt  = sub.find_next last_text
+    nt  = sub.find_next # READD support for custom last_text
 
     return puts "#{sub.name}: can't find last! #{nt.inspect}" if nt.blank? or nt.last.final.blank?
     puts "\n\n#{sub.name}: found last paragraph: \n#{nt.last.values_at(:original, :final).join "\n\n"}#{SECTION_SEP}"
     return puts "#{sub.name}: can't find next! #{nt.next.inspect}" if nt.next.final.blank?
 
-    fnt = sub.md_format nt.next
+    fnt = sub.md_format nt.next.slice(:original, :final)
     fnt.each{ |fp| puts "#{sub.name}: next text to post:\n#{fp}#{SECTION_SEP}" }
 
     return puts "#{sub.name}: dry run, quiting" if dry
@@ -61,7 +61,7 @@ class Sender
       sleep 1
     end unless dry or test
 
-    sub.next_update nt
+    sub.update_next nt
   end
 
   def test chat_id, **params

@@ -11,6 +11,7 @@ class Formatter
   end
 
   def md paras
+    paras = paras.flat_map{ |p| p.split "\n" }
     disable_heading = Selector.disable_heading? paras
 
     paras.map do |p|
