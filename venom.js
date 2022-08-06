@@ -9,9 +9,10 @@ const SOCK_FILE = 'run/venom.sock'
 
 async function load() {
   const client = await venom.create('default', null, null, {
-    refreshQR: 15000,
+    refreshQR: 60000,
     autoClose: 60 * 60 * 24 * 365, //never
-    disableSpins: true
+    disableSpins: true,
+    multidevice:  true,
   })
   const app = express()
   app.use(bodyParser.urlencoded({ extended: false }))
