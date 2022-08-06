@@ -41,6 +41,8 @@ class Sender
 
     sub = self.class.load_subscriber chat_id
     sub.reload # important and senders outside the daemon might have been triggered
+    puts "#{sub.name}: send"
+
     sub.update_content if update
     nt  = sub.find_next last_text
 

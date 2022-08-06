@@ -14,20 +14,27 @@ class Selector
   end
 
   def select paras
-    nt = []
     hi = -1
+    nt = [paras.shift]
 
     paras.each.with_index do |p, i|
-      break if i > hi+1 and nt.join.size + p.size > CHARS_LIMIT
       np = paras[i+1]
+      is_head     = p.size < HEADING_LIMIT
+      is_footer   = p =~ /^\d/ && is_head
+      n_is_head   = np && np.size < HEADING_LIMIT
+      n_is_footer = np && np =~ /^\d/ && n_is_head
+      oversize    = i > hi+1 && nt.join.size + p.size > CHARS_LIMIT 
+
+      break if oversize
       # stop if there is a heading in the middle
-      break if !opts.middle_headline and i > hi+1 and p.size < HEADING_LIMIT and (!np or np.size < HEADING_LIMIT)
+      middle_head = !is_footer && !opts.middle_headline && i > hi+1 && is_head && (!np or n_is_head)
+      break if middle_head
 
-      hi  = i if p.size < HEADING_LIMIT
+      hi  = i if is_head
       nt << p
+      nt << np and break if n_is_footer
+      break if is_footer
     end
-
-    nt.pop if !Selector.disable_heading?(paras) and nt.last.size < HEADING_LIMIT
 
     nt
   end

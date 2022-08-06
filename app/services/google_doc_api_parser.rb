@@ -35,11 +35,15 @@ class GoogleDocApiParser < BaseParser
 
   def updated_content
     tables = document.body.content.map{ |c| c.table }.compact
-    tables.flat_map do |t|
+    tables.each.with_object [] do |t, a|
       t.table_rows.map do |r|
-        SymMash.new(
-          original: parse_content(r.table_cells.first),
-          final:    parse_content(r.table_cells.second),
+        final    = parse_content r.table_cells.second
+        next if final.blank?
+        original = parse_content r.table_cells.first
+
+        a << SymMash.new(
+          original: original,
+          final:    final,
         )
       end
     end
