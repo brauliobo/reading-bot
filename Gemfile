@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-ruby '3.0.3'
+ruby '3.1.2'
 
 gem 'hashie'
 gem 'dotenv-rails'
@@ -9,6 +9,10 @@ gem 'highline'
 
 gem 'puppeteer-ruby'
 gem 'google-api-client'
+
+gem 'net-smtp', require: false
+gem 'net-imap', require: false
+gem 'net-pop', require: false
 
 gem 'rails', '~> 6.1.4', '>= 6.1.4.1'
 gem 'bootsnap', '>= 1.4.4', require: false
