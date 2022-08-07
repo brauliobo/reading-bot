@@ -17,7 +17,7 @@ class Formatter
     paras.map do |p|
       p = p.dup
 
-      if !disable_heading and p.size < Selector::HEADING_LIMIT
+      if !disable_heading and p.size < Selector::HEADING_LIMIT and p !~ /^\d/
         p = "*#{p}*"
       elsif (ih = p.index ':') and ih < Selector::HEADING_LIMIT
         p.insert 0, '*'
