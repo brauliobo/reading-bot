@@ -13,34 +13,40 @@ class Selector
     paras.count{ |p| p.size < HEADING_LIMIT } >= 4
   end
 
-  def select paras
-    hi = -1
-    nt = []
+  def select blocks
+    hi   = -1
+    nt   = []
+    pi   = 0
+    size = 0
 
-    paras.each.with_index do |p, i|
-      np = paras[i+1]
+    blocks.each do |paras|
+      paras.select.with_index do |p, i|
+        np = paras[i+1]
 
-      is_head       = p.size < HEADING_LIMIT
-      is_numbered   = p =~ /^\d/
-      is_footer     = is_head && is_numbered
-      n_is_head     = np && np.size < HEADING_LIMIT
-      n_is_numbered = np =~ /^\d/
-      n_is_footer   = n_is_head && n_is_numbered
-      oversize      = i > hi+1 && nt.join.size + p.size > CHARS_LIMIT 
-      middle_head   = i > hi+1 && is_head && !is_footer
+        is_head       = p.size < HEADING_LIMIT
+        is_numbered   = p =~ /^\d/
+        is_footer     = is_head && is_numbered
+        n_is_head     = np && np.size < HEADING_LIMIT
+        n_is_numbered = np =~ /^\d/
+        oversize      = nt.join.size + p.size > CHARS_LIMIT 
+        middle_head   = is_head && !is_footer
 
-      break if oversize
-      break if middle_head # stop if there is a heading in the middle
+        break if oversize
+        break if middle_head # stop if there is a heading in the middle
 
-      hi  = i if is_head
-      nt << p
-      nt << np and break if n_is_footer
-      break if is_footer
+        hi = i if is_head
+        true
+      end
+      pi   += 1
+      size += 1
     end
 
-    nt << paras.first if nt.blank?
-
-    nt
+    size = 1 and nt = blocks.first if nt.blank?
+    
+    SymMash.new(
+      blocks: size,
+      text:   nt,
+    )
   end
 
 end

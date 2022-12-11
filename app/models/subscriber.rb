@@ -45,22 +45,27 @@ class Subscriber < Sequel::Model
   def test **params
     bak  = self.values.slice :last_sent, :last_sent_at
     prev = last_sent = self.last_sent
-    while prev = last_sent
+    prev = content[self.p_start] if self.p_start
+    begin
       break puts "FINISHED" if finished?
 
       p_start = self.p_start # save for later usage, can be changed
       nt = find_next last_sent
       last_sent = update_next nt
+      
+      prev_lline  = prev.final.last
+      lastp_lline = content[last_sent.index-1].final.last
 
       raise "Missing last_sent"    if !last_sent&.index
-      puts  "LAST: #{last_sent.merge(text: last_sent.text&.map{ |p| p.first(50) }.join("\n")).inspect}"
+      puts  "LAST: #{last_sent.merge(text: last_sent.text.map{ |p| p.first(50) }.join("\n")).inspect}" if last_sent.text
       raise "Empty text"           if last_sent.text.blank?
       raise "Same index"           if prev.index == last_sent.index
       raise "Same text"            if prev.text  == last_sent.text
       next if p_start
       raise "Went before previous" if prev.index >  last_sent.index
       raise "Skipped text"         if prev.index +  prev[:size] < last_sent.index 
-    end
+      raise "Skipped text"         if !prev_lline.index lastp_lline.last(30)
+    end while prev = last_sent
   rescue => e
     puts e.message
     binding.pry
@@ -73,7 +78,7 @@ class Subscriber < Sequel::Model
     SymMash.new(last_sent).tap{ update last_sent: last_sent, last_sent_at: Time.now }
   end
   def update_next nt
-    update_last index: nt.next.index, size: nt.next.final.size, text: nt.next.final
+    update_last index: nt.next.index, size: nt.next[:size], text: nt.next.final
   end
 
   def last_from_text text
@@ -93,13 +98,15 @@ protected
   def select_next nextc, last: self.last_sent
     last.final ||= last.delete :text
 
-    original = nextc.text.flat_map(&:original) if nextc.text.first.original
-    final    = nextc.text.flat_map(&:final)
+    original = nextc.text.map(&:original) if nextc.text.first.original
+    final    = nextc.text.map(&:final)
+    selected = select final
 
     nt = SymMash.new last: last, next: {}
     nt.next.index    = nextc.index
-    nt.next.final    = select final
-    nt.next.original = original.first nt.next.final.size if original
+    nt.next.size     = selected.blocks
+    nt.next.final    = selected.text
+    nt.next.original = original.first nt.next[:size] if original
     nt
   end
 
@@ -120,8 +127,11 @@ protected
     select_next nextc, last: last_sent
   end
 
+  ##
+  # Warning: too complex, prefer #lookup_next_index
+  #
   def lookup_next_text last_sent = self.last_sent
-    # only last parameter could be a date (not enough)
+    # last 2, as the last paragraph could be a date (not enough)
     last_paras = last_sent.text&.last(2) || content.first.final
     last_index = last_sent.index || 0
 
