@@ -90,7 +90,7 @@ class Subscriber < Sequel::Model
     update_last last_from_text text
   end
   def set_last_from_index index
-    update_last index: index, size: 1, text: [content[index].final.first]
+    update_last index: index, size: 1, text: content[index].final
   end
 
 protected
