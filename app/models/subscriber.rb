@@ -20,6 +20,7 @@ class Subscriber < Sequel::Model
   end
 
   def last_sent
+    return content[p_start].merge index: p_start, size: 1 if p_start
     SymMash.new self[:last_sent]
   end
   def opts
@@ -45,7 +46,6 @@ class Subscriber < Sequel::Model
   def test **params
     bak  = self.values.slice :last_sent, :last_sent_at
     prev = last_sent = self.last_sent
-    prev = content[self.p_start] if self.p_start
     begin
       break puts "FINISHED" if finished?
 
@@ -59,9 +59,9 @@ class Subscriber < Sequel::Model
       raise "Missing last_sent"    if !last_sent&.index
       puts  "LAST: #{last_sent.merge(text: last_sent.text.map{ |p| p.first(50) }.join("\n")).inspect}" if last_sent.text
       raise "Empty text"           if last_sent.text.blank?
+      next if p_start
       raise "Same index"           if prev.index == last_sent.index
       raise "Same text"            if prev.text  == last_sent.text
-      next if p_start
       raise "Went before previous" if prev.index >  last_sent.index
       raise "Skipped text"         if prev.index +  prev[:size] < last_sent.index 
       raise "Skipped text"         if !prev_lline.index lastp_lline.last(30)
