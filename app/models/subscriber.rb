@@ -106,7 +106,7 @@ protected
     nt.next.index    = nextc.index
     nt.next.size     = selected.blocks
     nt.next.final    = selected.text
-    nt.next.original = original.first nt.next[:size] if original
+    nt.next.original = original.first(nt.next[:size]).flatten if original
     nt
   end
 
