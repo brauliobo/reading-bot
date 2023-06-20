@@ -31,6 +31,7 @@ async function load() {
     autoClose:    60 * 60 * 24 * 365, //never
     disableSpins: true,
     multidevice:  true,
+    executablePath: env.PUPPETEER_EXECUTABLE_PATH,
   })
 }
 

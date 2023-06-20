@@ -25,14 +25,6 @@ class GoogleDocApiParser < BaseParser
 
   attr_reader :document
 
-  def initialize subscriber, opts = SymMash.new
-    super
-  end
-
-  def document
-    @document ||= self.class.service.get_document resource
-  end
-
   def updated_content
     tables = document.body.content.map{ |c| c.table }.compact
     tables.each.with_object [] do |t, a|
@@ -50,6 +42,10 @@ class GoogleDocApiParser < BaseParser
   end
 
   protected
+
+  def document
+    @document ||= self.class.service.get_document resource
+  end
 
   def parse_content el
     parse_paras el.content.flat_map{ |c| c.paragraph.elements.map{ |e| e.text_run&.content } }

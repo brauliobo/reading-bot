@@ -8,6 +8,7 @@ class GoogleDocBrowserParser < BaseParser
 
   class_attribute :browser
   def self.load
+    return unless browser
     Thread.new do
       Puppeteer.launch(**OPTS) do |browser|
         self.browser = browser
@@ -19,15 +20,10 @@ class GoogleDocBrowserParser < BaseParser
 
   attr_reader :page, :parsed, :sections
 
-  def initialize resource, opts = SymMash.new
-    super
-    self.class.load unless browser
-
-    load_page
-    reload
-  end
-
   def updated_content
+    self.class.load
+    load_page
+    parse_content
     @sections.each.with_object [] do |sec, a|
       paras = parse_sec sec
       next if paras.blank?
@@ -49,7 +45,7 @@ class GoogleDocBrowserParser < BaseParser
     end
   end
 
-  def reload
+  def parse_content
     @parsed   = Nokogiri::HTML page.content
     @sections = @parsed.css('script:contains("DOCS_modelChunkLoadStart")')
   end

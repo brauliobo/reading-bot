@@ -8,6 +8,7 @@ User=braulio
 WorkingDirectory=/home/braulio/Projects/reading-bot
 ExecStart=/home/braulio/.rvm/wrappers/ruby-3.1.2/ruby bin/daemon
 Environment=VENOM_API_PORT=2002
+Environment=PUPPETEER_EXECUTABLE_PATH=/usr/bin/thorium-browser
 Restart=always
 RestartSec=60
 StartLimitInterval=0

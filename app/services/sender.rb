@@ -15,9 +15,6 @@ class Sender
     end
   end
   def self.load_all
-    GoogleDocBrowserParser.load
-    GoogleDocApiParser.load
-
     self.subscribers = {}
     Subscriber.where(enabled: true).all.peach do |s, h|
       puts "#{s.name}: loading resource"
