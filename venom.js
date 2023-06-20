@@ -8,12 +8,6 @@ const bodyParser = require('body-parser')
 const SOCK_FILE = 'run/venom.sock'
 
 async function load() {
-  const client = await venom.create('default', null, null, {
-    refreshQR: 60000,
-    autoClose: 60 * 60 * 24 * 365, //never
-    disableSpins: true,
-    multidevice:  true,
-  })
   const app = express()
   app.use(bodyParser.urlencoded({ extended: false }))
 
@@ -27,10 +21,17 @@ async function load() {
       return res.send(e.message)
     }
     console.log(ret)
-
   })
 
-  app.listen(env.VENOM_API_PORT, () => {})
+  app.listen(env.VENOM_API_PORT || 2002, () => {})
+
+  const client = await venom.create({
+    session:      'default',
+    refreshQR:    60000,
+    autoClose:    60 * 60 * 24 * 365, //never
+    disableSpins: true,
+    multidevice:  true,
+  })
 }
 
 (async () => {

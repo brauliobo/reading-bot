@@ -1,6 +1,7 @@
 class Whatsapp
 
-  VENOM_API_URL = "http://localhost:2002"
+  VENOM_API_PORT = ENV['VENOM_API_PORT']&.to_i || 2002
+  VENOM_API_URL  = "http://localhost:#{VENOM_API_PORT}"
 
   extend ActionView::Helpers::JavaScriptHelper
 
