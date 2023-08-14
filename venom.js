@@ -16,10 +16,11 @@ async function load() {
     console.log(`Running ${input}...`)
     try {
       ret = await eval(`(async () => { return ${input}; })()`)
-      return res.send(ret)
+      res.send(ret)
     } catch(e) {
-      return res.send(e.message)
+      res.send(e.message)
     }
+    return res.end()
     console.log(ret)
   })
 
@@ -29,8 +30,7 @@ async function load() {
     session:      'default',
     refreshQR:    60000,
     autoClose:    60 * 60 * 24 * 365, //never
-    disableSpins: true,
-    multidevice:  true,
+    headless:     true,
     executablePath: env.PUPPETEER_EXECUTABLE_PATH,
   })
 }

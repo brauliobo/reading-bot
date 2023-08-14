@@ -5,6 +5,7 @@ ruby '3.1.2'
 gem 'hashie'
 gem 'dotenv-rails'
 gem 'httpclient'
+gem 'mechanize'
 gem 'highline'
 
 gem 'puppeteer-ruby'
