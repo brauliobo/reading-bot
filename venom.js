@@ -31,7 +31,16 @@ async function load() {
     refreshQR:    60000,
     autoClose:    60 * 60 * 24 * 365, //never
     headless:     true,
-    executablePath: env.PUPPETEER_EXECUTABLE_PATH,
+    puppeteerOptions: {
+      ignoreDefaultArgs: [
+        '--disable-extensions'
+      ],
+    },
+    browserArgs: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      "--disabled-setupid-sandbox"
+    ],
   })
 }
 
