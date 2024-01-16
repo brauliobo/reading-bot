@@ -10155,7 +10155,7 @@ vendors@^1.0.0:
   resolved "https://registry.npmjs.org/vendors/-/vendors-1.0.4.tgz"
   integrity sha512-/juG65kTL4Cy2su4P8HjtkTxk6VmJDiOPBufWniqQ6wknac6jNiXS9vU+hO3wgusiyqWlzTbVHi0dyJqRONg3w==
 
-venom-bot@^5.0.6:
+venom-bot@>=5.0.21:
   version "5.0.21"
   resolved "https://registry.npmjs.org/venom-bot/-/venom-bot-5.0.21.tgz"
   integrity sha512-+9CBPIrBZGQw6bh+vPlgBStBNnhqn2zZWuI4RbmBz1jZZxcb/mSF1Z776ZjiP3GJRyxjfxxtTmy71JFPFzPchg==
