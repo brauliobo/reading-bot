@@ -176,7 +176,7 @@ module TelegramHelpers
 
   def parse_text text, parse_mode:
     return unless text
-    TelegramHelpers.limit text
+    text
   end
 
   MARKDOWN_NON_FORMAT = %w[\# / [ ] ( ) " ~ # + - = | { } . ! < >]

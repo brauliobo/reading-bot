@@ -14,7 +14,7 @@ class WhatsappSender < SenderService
 
   def send_paras chat_id, paras
     text = Formatter.md_format paras
-    self.class.send_message msg, text, message_thread_id: reply_id
+    self.class.send_message chat_id, text
     nil # FIXME
   end
 
@@ -23,6 +23,7 @@ class WhatsappSender < SenderService
   protected
 
   def self.venom_start
+    Process.setpgrp
     Thread.new do
       while !@stop
         pid = spawn 'node venom.js'

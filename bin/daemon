@@ -4,8 +4,10 @@ require_relative '../config/environment'
 
 Sender.interactive = false
 
+Process.setpgrp
+
 TelegramSender.start
-#WhatsappSender.start
+WhatsappSender.start
 ControlApi.launch
 Scheduler.run
 

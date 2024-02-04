@@ -14,8 +14,9 @@ class TelegramSender < SenderService
   def send_paras chat_id, paras
     chat_id, reply_id = chat_id.split '@' if chat_id.index '@'
     smsg = SymMash.new chat: {id: chat_id}, message_id: reply_id
-    text = Formatter.md_format paras, inner_escape: method(:me)
-    msg  = send_message smsg, text, message_thread_id: reply_id
+    text = Formatter.html_format paras
+    puts text if ENV['DEBUG']
+    msg  = send_message smsg, text, message_thread_id: reply_id, parse_mode: 'HTML'
     SymMash.new(
       id:      msg.result.message_id,
       text:    msg.text,

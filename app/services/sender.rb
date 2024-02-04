@@ -14,9 +14,9 @@ class Sender
       s.parse
     end
   end
-  def self.load_all
+  def self.load_all ds = Subscriber
     self.subscribers = {}
-    Subscriber.where(enabled: true).all.peach do |s, h|
+    ds.where(enabled: true).all.peach do |s, h|
       puts "#{s.name}: loading resource"
       subscribers[s.chat_id] = s.tap{ s.parse }
     end
