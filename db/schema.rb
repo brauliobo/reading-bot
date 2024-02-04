@@ -53,10 +53,13 @@ Sequel.migration do
       column :name, "text"
       column :parser, "text"
       column :resource, "text"
-      column :last_text, "text"
       column :opts, "jsonb", :default=>Sequel::LiteralString.new("'{}'::jsonb")
       column :enabled, "boolean"
       column :last_sent_at, "timestamp without time zone"
+      column :content, "jsonb"
+      column :last_sent, "jsonb", :default=>Sequel::LiteralString.new("'{}'::jsonb")
+      column :schedule_cron, "text"
+      column :messages, "jsonb", :default=>Sequel::LiteralString.new("'[]'::jsonb")
       
       primary_key [:service, :chat_id]
     end
@@ -82,5 +85,6 @@ end
                   self << "INSERT INTO \"schema_migrations\" (\"filename\") VALUES ('20211128022411_devise_create_users.rb')"
 self << "INSERT INTO \"schema_migrations\" (\"filename\") VALUES ('20211128022544_devise_create_admin_users.rb')"
 self << "INSERT INTO \"schema_migrations\" (\"filename\") VALUES ('20211128022546_create_active_admin_comments.rb')"
+self << "INSERT INTO \"schema_migrations\" (\"filename\") VALUES ('20240203232939_add_message_to_subscribers.rb')"
                 end
               end

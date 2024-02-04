@@ -47,18 +47,24 @@ class Sender
     puts "\n\n#{sub.name}: found last paragraph: \n#{nt.last.values_at(:original, :final).join "\n\n"}#{SECTION_SEP}"
     return puts "#{sub.name}: can't find next! #{nt.next.inspect}" if nt.next.final.blank?
 
-    fnt = sub.md_format nt.next.slice(:original, :final)
-    fnt.each{ |fp| puts "#{sub.name}: next text to post:\n#{fp}#{SECTION_SEP}" }
+    set = nt.next.slice(:original, :final).values
+    set.each{ |ps| puts "#{sub.name}: next text to post:\n#{ps}#{SECTION_SEP}" }
 
     return puts "#{sub.name}: dry run, quiting" if dry
     return unless confirm sub, nt unless noconfirm
 
-    fnt.each do |fnp|
-      Whatsapp.send_message sub.chat_id, fnp
-      sleep 1
-    end unless dry or test
+    return if dry or test
 
-    sub.update_next nt
+    msgs = set.map do |paras|
+      msg = sub.sender.send_paras sub.chat_id, paras
+      msg.tap{ sleep 1 }
+    end.compact
+
+    sub.class.db.transaction do
+      sub.update_next nt
+      sub.messages = sub.messages.concat msgs if msgs.present?
+      sub.save
+    end
   end
 
   def test chat_id, **params

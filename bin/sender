@@ -4,7 +4,9 @@ require_relative '../config/environment'
 
 #Whatsapp.send_message '5512991564509@c.us', '_teste2_'
 
-ENV['CHAT_ID'] = Subscriber.find(Sequel.like :name, "%#{ENV['CHAT_NAME']}%")&.chat_id if ENV['CHAT_NAME']
+ds = Subscriber
+ds = ds.where service: ENV['SERVICE'] if ENV['SERVICE']
+ENV['CHAT_ID'] = ds.where(Sequel.like :name, "%#{ENV['CHAT_NAME']}%").first&.chat_id if ENV['CHAT_NAME']
 
 sender = Sender.new
 

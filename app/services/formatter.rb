@@ -2,20 +2,18 @@ class Formatter
 
   LINE_SEP = "\n\n"
 
-  def self.md_format nt
-    i = Formatter.new
-    nt.each.with_object [] do |(order, paras), l|
-      next unless paras
-      l << i.md(paras)
-    end
+  def self.md_format nt, inner_escape: nil
+    f = Formatter.new
+    f.md nt, ie: inner_escape
   end
 
-  def md paras
+  def md paras, ie:
     paras = paras.flat_map{ |p| p.split "\n" }
     disable_heading = Selector.disable_heading? paras
 
     paras.map do |p|
       p = p.dup
+      p = ie.call p if ie
 
       if !disable_heading and p.size < Selector::HEADING_LIMIT and p !~ /^\d/
         p = "*#{p}*"

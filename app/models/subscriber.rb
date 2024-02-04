@@ -8,6 +8,10 @@ class Subscriber < Sequel::Model
 
   attr_reader :parsed
 
+  def sender
+    @sender ||= "#{service}_sender".camelize.constantize.new
+  end
+
   def parse
     @parsed ||= parser.constantize.new self, opts
   end
@@ -37,10 +41,6 @@ class Subscriber < Sequel::Model
 
   def select paras
     Selector.new(opts).select paras
-  end
-
-  def md_format nt
-    Formatter.md_format nt
   end
 
   def test **params

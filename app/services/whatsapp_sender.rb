@@ -1,4 +1,4 @@
-class Whatsapp
+class WhatsappSender < SenderService
 
   VENOM_API_PORT = ENV['VENOM_API_PORT']&.to_i || 2002
   VENOM_API_URL  = "http://localhost:#{VENOM_API_PORT}"
@@ -6,6 +6,21 @@ class Whatsapp
   HEADERS = {'Content-type' => 'application/x-www-form-urlencoded'}
 
   extend ActionView::Helpers::JavaScriptHelper
+
+  def self.start
+    super
+    venom_start
+  end
+
+  def send_paras chat_id, paras
+    text = Formatter.md_format paras
+    self.class.send_message msg, text, message_thread_id: reply_id
+    nil # FIXME
+  end
+
+  delegate :send_message, to: :class
+
+  protected
 
   def self.venom_start
     Thread.new do

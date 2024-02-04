@@ -4,7 +4,8 @@ require_relative '../config/environment'
 
 Sender.interactive = false
 
-Whatsapp.venom_start
+TelegramSender.start
+#WhatsappSender.start
 ControlApi.launch
 Scheduler.run
 

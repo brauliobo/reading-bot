@@ -24,5 +24,7 @@ module ReadingBot
     #
     # config.time_zone = 'Central Time (US & Canada)'
     #config.eager_load_paths << Rails.root.join('app/services')
+
+     config.sequel.load_database_tasks = :sequel
   end
 end

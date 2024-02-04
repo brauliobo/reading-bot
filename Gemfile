@@ -28,6 +28,8 @@ gem 'activeadmin'
 
 gem 'rufus-scheduler'
 
+gem 'telegram-bot-ruby'
+
 gem 'execjs'
 
 gem 'roda'
