@@ -4,7 +4,7 @@ require_relative '../config/environment'
 
 Sender.interactive = false
 
-Process.setpgrp
+Process.setpgrp unless ENV['JOURNAL_STREAM']
 
 TelegramSender.start
 WhatsappSender.start

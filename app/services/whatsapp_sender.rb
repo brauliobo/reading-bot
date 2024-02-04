@@ -9,6 +9,7 @@ class WhatsappSender < SenderService
 
   def self.start
     super
+    return if port_open? VENOM_API_PORT
     venom_start
   end
 
@@ -23,7 +24,6 @@ class WhatsappSender < SenderService
   protected
 
   def self.venom_start
-    Process.setpgrp
     Thread.new do
       while !@stop
         pid = spawn 'node venom.js'
@@ -48,6 +48,10 @@ class WhatsappSender < SenderService
 
   def self.http
     Mechanize.new
+  end
+
+  def self.port_open? port
+    system "lsof -i:#{port}", out: '/dev/null'
   end
 
 end
