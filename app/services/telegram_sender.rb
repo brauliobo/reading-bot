@@ -7,6 +7,7 @@ class TelegramSender < SenderService
 
   def self.start
     super
+    return if bot
     connect
     sleep 0.5 while !bot
   end
@@ -40,6 +41,8 @@ class TelegramSender < SenderService
           end
           Thread.new{ sleep 1 and abort } if @exit # wait for other msg processing and trigger systemd restart
         end
+      rescue
+        self.bot = nil
       end
     end
   end
