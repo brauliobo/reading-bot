@@ -43,6 +43,7 @@ class TelegramSender < SenderService
         end
       rescue
         self.bot = nil
+        raise
       end
     end
   end
