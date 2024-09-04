@@ -40,8 +40,8 @@ yarn-debug.log*
 .yarn-integrity
 
 # browser profile
-tokens
-.tokens*
+.wwebjs_auth
+.wwebjs_cache
 
 # google creds
 credentials.json
