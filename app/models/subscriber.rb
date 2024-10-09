@@ -115,6 +115,8 @@ protected
     offset   = p_start        || last_sent.index  || 0
     nstart   = offset + size
     lcontent = self.content[offset..nstart]
+
+    nstart   = self.opts.start_index || 0 if nstart >= self.content.size # restart
     ncontent = self.content[nstart..(nstart+NEXT_LIMIT)]
 
     if lcontent.first.final.first != last_sent.text.first
