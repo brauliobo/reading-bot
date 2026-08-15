@@ -1,5 +1,6 @@
 require_relative 'boot'
 
+require 'logger'
 require 'rails/all'
 
 require 'pry'
@@ -10,12 +11,12 @@ require_relative '../lib/peach'
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
-Dotenv::Railtie.load
+Dotenv::Rails.load
 
 module ReadingBot
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
-    config.load_defaults 6.1
+    config.load_defaults 7.2
 
     # Configuration for the application, engines, and railties goes here.
     #

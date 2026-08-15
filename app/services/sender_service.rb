@@ -4,8 +4,10 @@ class SenderService
   self.running = false
 
   def self.start
-    return unless running
+    return false if running
+
     self.running = true
+    true
   end
 
   def initialize

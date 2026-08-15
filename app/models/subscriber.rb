@@ -74,11 +74,25 @@ class Subscriber < Sequel::Model
     update bak
   end
 
-  def update_last last_sent
-    SymMash.new(last_sent).tap{ update last_sent: last_sent, last_sent_at: Time.now }
+  def update_last last_sent, messages: nil
+    values = {
+      last_sent:    last_sent,
+      last_sent_at: Time.now,
+    }
+    values[:messages] = messages if messages
+    update values
+    SymMash.new last_sent
   end
-  def update_next nt
-    update_last index: nt.next.index, size: nt.next[:size], text: nt.next.final
+
+  def update_next nt, messages: nil
+    update_last(
+      {
+        index: nt.next.index,
+        size:  nt.next[:size],
+        text:  nt.next.final,
+      },
+      messages: messages,
+    )
   end
 
   def last_from_text text

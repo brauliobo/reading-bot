@@ -1,4 +1,4 @@
-const env = require('dotenv').config().parsed;
+const env = require('dotenv').config().parsed || {};
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal'); // Import the QR code package
 const fs = require('fs');
@@ -18,14 +18,13 @@ async function load() {
     console.log(`Running ${input}...`);
     try {
       const ret = await eval(`(async () => { return ${input}; })()`);
-      res.send(ret);
+      res.json({ ok: true, result: ret });
     } catch (e) {
-      res.send(e.message);
+      res.status(500).json({ ok: false, error: e.message });
     }
-    return res.end();
   });
 
-  app.listen(env.WHATSAPP_API_PORT || 2002, () => {});
+  app.listen(env.WHATSAPP_API_PORT || env.WA_API_PORT || 2002, () => {});
 
   // Create client with persistent session using LocalAuth
   const client = new Client({
@@ -62,4 +61,3 @@ async function load() {
 })();
 
 process.on('SIGINT', () => fs.unlinkSync(SOCK_FILE));
-

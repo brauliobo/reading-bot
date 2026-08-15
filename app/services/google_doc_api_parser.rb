@@ -7,7 +7,7 @@ class GoogleDocApiParser < BaseParser
 
   CREDENTIALS_PATH = 'credentials.json'.freeze
   SCOPE            = Google::Apis::DocsV1::AUTH_DOCUMENTS_READONLY
-  PARAMS           = {scope: SCOPE, json_key_io: File.open(CREDENTIALS_PATH)} if File.exists? CREDENTIALS_PATH
+  PARAMS           = {scope: SCOPE, json_key_io: File.open(CREDENTIALS_PATH)} if File.exist? CREDENTIALS_PATH
 
   def self.authorizer
     @authorizer ||= Google::Auth::ServiceAccountCredentials.make_creds(PARAMS).tap do |a|

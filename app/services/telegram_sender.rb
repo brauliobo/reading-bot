@@ -6,9 +6,9 @@ class TelegramSender < SenderService
   class_attribute :bot
 
   def self.start
-    super
     return if bot
-    connect
+
+    connect if super
     sleep 0.5 while !bot
   end
 
@@ -43,10 +43,10 @@ class TelegramSender < SenderService
         end
       rescue
         self.bot = nil
+        self.running = false
         raise
       end
     end
   end
 
 end
-

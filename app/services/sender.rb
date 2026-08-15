@@ -10,9 +10,7 @@ class Sender
   self.subscribers = {}
 
   def self.load_subscriber chat_id
-    subscribers[chat_id] ||= Subscriber.where(chat_id: chat_id).first.tap do |s|
-      s.parse
-    end
+    subscribers[chat_id] ||= Subscriber.where(chat_id: chat_id).first.tap{ |s| s&.parse }
   end
   def self.load_all ds = Subscriber
     self.subscribers = {}
@@ -26,22 +24,50 @@ class Sender
   end
 
   def send_enabled update: false
-    subscribers.each do |chat_id, sub|
-      send chat_id
+    subscribers.each_key do |chat_id|
+      send chat_id, update: update
     end
   end
 
   SECTION_SEP = "\n--------------\n"
 
   def send chat_id, last_text: nil, update: false,
-    test: false, dry: !!ENV['SKIP_SEND'], noconfirm: !self.interactive
+    test: false, dry: self.class.dry || !!ENV['SKIP_SEND'], noconfirm: !self.interactive
 
+    cached = self.class.load_subscriber chat_id
+    return puts "#{chat_id}: can't find subscriber" unless cached
+
+    cached.class.db.transaction do
+      sub = cached.class.where(service: cached.service, chat_id: cached.chat_id).for_update.first
+      send_locked sub, last_text: last_text, update: update,
+        test: test, dry: dry, noconfirm: noconfirm
+    end
+  end
+
+  def test chat_id, **params
     sub = self.class.load_subscriber chat_id
-    sub.reload # important and senders outside the daemon might have been triggered
+    sub.test **params
+  end
+
+  def set_last_from_text chat_id, text
+    sub = self.class.load_subscriber chat_id
+    sub.set_last_from_text text
+  end
+  def set_last_from_index chat_id, index
+    sub = self.class.load_subscriber chat_id
+    sub.set_last_from_index index
+  end
+
+  protected
+
+  def send_locked sub, last_text:, update:, test:, dry:, noconfirm:
+    return puts "subscriber disappeared" unless sub
+
     puts "#{sub.name}: send"
 
     sub.update_content if update
-    nt  = sub.find_next # READD support for custom last_text
+    last_sent = last_text ? sub.last_from_text(last_text) : sub.last_sent
+    nt = sub.find_next last_sent
 
     return puts "#{sub.name}: can't find last! #{nt.inspect}" if nt.blank? or nt.last.final.blank?
     puts "\n\n#{sub.name}: found last paragraph: \n#{nt.last.values_at(:original, :final).join "\n\n"}#{SECTION_SEP}"
@@ -57,31 +83,12 @@ class Sender
 
     msgs = set.map do |paras|
       msg = sub.sender.send_paras sub.chat_id, paras
+      raise "#{sub.sender.class} returned no delivery record" unless msg
       msg.tap{ sleep 1 }
-    end.compact
-
-    sub.class.db.transaction do
-      sub.update_next nt
-      sub.messages = sub.messages.concat msgs if msgs.present?
-      sub.save
     end
-  end
 
-  def test chat_id, **params
-    sub = self.class.load_subscriber chat_id
-    sub.test **params
+    sub.update_next nt, messages: Array(sub.messages) + msgs
   end
-
-  def set_last_from_text  chat_id, text
-    sub = self.class.load_subscriber chat_id
-    sub.set_last_from_text  text
-  end
-  def set_last_from_index chat_id, index
-    sub = self.class.load_subscriber chat_id
-    sub.set_last_from_index index
-  end
-
-  protected
 
   def confirm sub, nt
     begin
@@ -99,4 +106,3 @@ class Sender
   end
 
 end
-
