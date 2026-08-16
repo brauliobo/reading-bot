@@ -10,10 +10,19 @@ const SOCK_FILE = 'run/whatsapp.sock';
 
 async function load() {
   const app = express();
+  let ready = false;
   app.use(bodyParser.urlencoded({ extended: false }));
+
+  app.get('/health', (_req, res) => {
+    res.json({ ready });
+  });
 
   // HTTP API endpoint for evaluating JavaScript
   app.post('/eval', async (req, res) => {
+    if (!ready) {
+      return res.status(503).json({ ok: false, error: 'WhatsApp client is not ready' });
+    }
+
     const input = req.body.input;
     console.log(`Running ${input}...`);
     try {
@@ -24,13 +33,14 @@ async function load() {
     }
   });
 
-  app.listen(env.WHATSAPP_API_PORT || env.WA_API_PORT || 2002, () => {});
+  app.listen(env.WHATSAPP_API_PORT || env.WA_API_PORT || 2002, '127.0.0.1', () => {});
 
   // Create client with persistent session using LocalAuth
   const client = new Client({
     authStrategy: new LocalAuth(), // Stores session data
     puppeteer: {
       headless: true,
+      executablePath: env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium',
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
@@ -45,7 +55,12 @@ async function load() {
   });
 
   client.on('ready', () => {
+    ready = true;
     console.log('Client is ready!');
+  });
+
+  client.on('disconnected', () => {
+    ready = false;
   });
 
   client.on('message', async (msg) => {

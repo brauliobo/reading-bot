@@ -1,5 +1,7 @@
 class WhatsappSender < SenderService
 
+  require 'timeout'
+
   WAWEB_API_PORT = (ENV['WA_API_PORT'] || ENV['WHATSAPP_API_PORT'] || 2002).to_i
   WAWEB_API_URL  = "http://localhost:#{WAWEB_API_PORT}"
 
@@ -8,16 +10,23 @@ class WhatsappSender < SenderService
   def self.start
     return unless super
 
-    return if port_open? WAWEB_API_PORT
-    waweb_start
+    waweb_start unless port_open? WAWEB_API_PORT
+    Timeout.timeout(120) do
+      sleep 0.5 until port_open?(WAWEB_API_PORT) && ready?
+    end
+  rescue
+    self.running = false
+    raise
   end
 
   def send_paras chat_id, paras
     text = Formatter.md_format paras
     response = self.class.send_message chat_id, text
+    id = response['id']
+    id = id['_serialized'] if id.is_a? Hash
 
     SymMash.new(
-      id:      response.dig('id', '_serialized') || response['id'],
+      id:      id,
       text:    text,
       sent_at: Time.now,
     )
@@ -42,7 +51,26 @@ class WhatsappSender < SenderService
   end
 
   def self.send_message chat_id, text
-    run "client.sendMessage(#{JSON.generate chat_id}, #{JSON.generate text})"
+    chat_id = JSON.generate chat_id
+    text    = JSON.generate text
+    run <<~JS
+      client.pupPage.evaluate(async (chatId, text) => {
+        const chat = await window.WWebJS.getChat(chatId, {getAsModel: false});
+        if (!chat) throw new Error('WhatsApp chat was not found');
+
+        await window.WWebJS.sendSeen(chatId);
+        const message = await window.WWebJS.sendMessage(chat, text, {
+          linkPreview: true,
+          parseVCards: true,
+          mentionedJidList: [],
+          ignoreQuoteErrors: true,
+          extraOptions: {},
+        });
+        if (!message) throw new Error('WhatsApp returned no sent message');
+
+        return {id: message.id.toString()};
+      }, #{chat_id}, #{text})
+    JS
   end
 
   def self.run code
@@ -55,6 +83,10 @@ class WhatsappSender < SenderService
 
   def self.http
     Mechanize.new
+  end
+
+  def self.ready?
+    JSON.parse(http.get("#{WAWEB_API_URL}/health").body).fetch 'ready'
   end
 
   def self.port_open? port

@@ -1,0 +1,5 @@
+allowBuilds:
+  '@parcel/watcher': false
+  core-js: false
+  puppeteer: false
+  whatsapp-web.js: true

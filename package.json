@@ -1,6 +1,7 @@
 {
   "name": "reading-bot",
   "private": true,
+  "packageManager": "pnpm@11.3.0",
   "dependencies": {
     "@rails/actioncable": "^6.0.0",
     "@rails/activestorage": "^6.0.0",
@@ -13,7 +14,7 @@
     "turbolinks": "^5.2.0",
     "webpack": "^4.46.0",
     "webpack-cli": "^3.3.12",
-    "whatsapp-web.js": "^1.25.0"
+    "whatsapp-web.js": "github:wwebjs/whatsapp-web.js#942d236a11ad68807308b058303ba5256915979c"
   },
   "version": "0.1.0",
   "devDependencies": {
