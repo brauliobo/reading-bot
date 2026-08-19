@@ -37,10 +37,19 @@ class Sender
     cached = self.class.load_subscriber chat_id
     return puts "#{chat_id}: can't find subscriber" unless cached
 
+    job = nil
     cached.class.db.transaction do
-      sub = cached.class.where(service: cached.service, chat_id: cached.chat_id).for_update.first
-      send_locked sub, last_text: last_text, update: update,
+      sub = lock_sub cached
+      job = prepare_send sub, last_text: last_text, update: update,
         test: test, dry: dry, noconfirm: noconfirm
+      sub.update_next job.nt if job
+    end
+    return unless job
+
+    msgs = job.set.map { |paras| job.sub.sender.send_paras(job.sub.chat_id, paras).tap { sleep 1 } }
+    job.sub.class.db.transaction do
+      sub = lock_sub job.sub
+      sub.update messages: Array(sub.messages) + msgs
     end
   end
 
@@ -60,34 +69,31 @@ class Sender
 
   protected
 
-  def send_locked sub, last_text:, update:, test:, dry:, noconfirm:
+  def lock_sub sub
+    sub.class.where(service: sub.service, chat_id: sub.chat_id).for_update.first
+  end
+
+  def prepare_send sub, last_text:, update:, test:, dry:, noconfirm:
     return puts "subscriber disappeared" unless sub
 
     puts "#{sub.name}: send"
 
     sub.update_content if update
     last_sent = last_text ? sub.last_from_text(last_text) : sub.last_sent
-    nt = sub.find_next last_sent
+    nt        = sub.find_next last_sent
 
     return puts "#{sub.name}: can't find last! #{nt.inspect}" if nt.blank? or nt.last.final.blank?
     puts "\n\n#{sub.name}: found last paragraph: \n#{nt.last.values_at(:original, :final).join "\n\n"}#{SECTION_SEP}"
     return puts "#{sub.name}: can't find next! #{nt.next.inspect}" if nt.next.final.blank?
 
-    set = nt.next.slice(:original, :final).values
+    set = nt.next.values_at(:original, :final).compact
     set.each{ |ps| puts "#{sub.name}: next text to post:\n#{ps}#{SECTION_SEP}" }
 
     return puts "#{sub.name}: dry run, quiting" if dry
-    return unless confirm sub, nt unless noconfirm
+    return unless noconfirm || confirm(sub, nt)
+    return if test
 
-    return if dry or test
-
-    msgs = set.map do |paras|
-      msg = sub.sender.send_paras sub.chat_id, paras
-      raise "#{sub.sender.class} returned no delivery record" unless msg
-      msg.tap{ sleep 1 }
-    end
-
-    sub.update_next nt, messages: Array(sub.messages) + msgs
+    SymMash.new sub: sub, nt: nt, set: set
   end
 
   def confirm sub, nt

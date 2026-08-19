@@ -52,4 +52,15 @@ class SenderIntegrationTest < Minitest::Test
     assert_equal 2, Subscriber.where(service: SERVICE, chat_id: @chat_id).first.messages.length
     assert_equal 2, Subscriber.where(service: SERVICE, chat_id: @chat_id).first.last_sent.index
   end
+
+  def test_advances_last_sent_before_delivery
+    original = IntegrationSender.instance_method(:send_paras)
+    IntegrationSender.define_method(:send_paras) { |_chat_id, _paras| raise 'delivery failed' }
+
+    error = assert_raises(RuntimeError) { Sender.new.send @chat_id, noconfirm: true }
+    assert_equal 'delivery failed', error.message
+    assert_equal 1, Subscriber.where(service: SERVICE, chat_id: @chat_id).first.last_sent.index
+  ensure
+    IntegrationSender.define_method(:send_paras, original) if original
+  end
 end

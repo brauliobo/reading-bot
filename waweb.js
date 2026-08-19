@@ -29,7 +29,7 @@ async function load() {
       const ret = await eval(`(async () => { return ${input}; })()`);
       res.json({ ok: true, result: ret });
     } catch (e) {
-      res.status(500).json({ ok: false, error: e.message });
+      res.json({ ok: false, error: e.message });
     }
   });
 

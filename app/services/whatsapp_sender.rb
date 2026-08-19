@@ -21,15 +21,9 @@ class WhatsappSender < SenderService
 
   def send_paras chat_id, paras
     text = Formatter.md_format paras
-    response = self.class.send_message chat_id, text
-    id = response['id']
-    id = id['_serialized'] if id.is_a? Hash
-
-    SymMash.new(
-      id:      id,
-      text:    text,
-      sent_at: Time.now,
-    )
+    id   = self.class.send_message(chat_id, text)['id']
+    id   = id['_serialized'] if id.is_a? Hash
+    SymMash.new id: id, text: text, sent_at: Time.now
   end
 
   delegate :send_message, to: :class
@@ -59,16 +53,16 @@ class WhatsappSender < SenderService
         if (!chat) throw new Error('WhatsApp chat was not found');
 
         await window.WWebJS.sendSeen(chatId);
-        const message = await window.WWebJS.sendMessage(chat, text, {
+        await window.WWebJS.sendMessage(chat, text, {
           linkPreview: true,
           parseVCards: true,
           mentionedJidList: [],
           ignoreQuoteErrors: true,
-          extraOptions: {},
+          waitUntilMsgSent: true,
         });
-        if (!message) throw new Error('WhatsApp returned no sent message');
-
-        return {id: message.id.toString()};
+        const last = chat.msgs.getModelsArray().filter(m => m.id.fromMe).pop();
+        if (!last) throw new Error('WhatsApp returned no sent message');
+        return {id: String(last.id)};
       }, #{chat_id}, #{text})
     JS
   end
