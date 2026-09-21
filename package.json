@@ -14,7 +14,7 @@
     "turbolinks": "^5.2.0",
     "webpack": "^4.46.0",
     "webpack-cli": "^3.3.12",
-    "whatsapp-web.js": "github:wwebjs/whatsapp-web.js#942d236a11ad68807308b058303ba5256915979c"
+    "whatsapp-web.js": "github:wwebjs/whatsapp-web.js#bfea4cf9d7c1955953c2966dcfb7f7ce78c816ab"
   },
   "version": "0.1.0",
   "devDependencies": {

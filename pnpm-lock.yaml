@@ -42,8 +42,8 @@ importers:
         specifier: ^3.3.12
         version: 3.3.12(webpack@4.47.0)
       whatsapp-web.js:
-        specifier: github:wwebjs/whatsapp-web.js#942d236a11ad68807308b058303ba5256915979c
-        version: https://codeload.github.com/wwebjs/whatsapp-web.js/tar.gz/942d236a11ad68807308b058303ba5256915979c
+        specifier: github:wwebjs/whatsapp-web.js#bfea4cf9d7c1955953c2966dcfb7f7ce78c816ab
+        version: https://codeload.github.com/wwebjs/whatsapp-web.js/tar.gz/bfea4cf9d7c1955953c2966dcfb7f7ce78c816ab
     devDependencies:
       webpack-dev-server:
         specifier: ^3
@@ -4470,8 +4470,8 @@ packages:
     resolution: {integrity: sha512-OqedPIGOfsDlo31UNwYbCFMSaO9m9G/0faIHj5/dZFDMFqPTcx6UwqyOy3COEaEOg/9VsGIpdqn62W5KhoKSpg==}
     engines: {node: '>=0.8.0'}
 
-  whatsapp-web.js@https://codeload.github.com/wwebjs/whatsapp-web.js/tar.gz/942d236a11ad68807308b058303ba5256915979c:
-    resolution: {gitHosted: true, integrity: sha512-2b5rHRmKS77Mjfqn7Q/uMPM01jkFcHyAX4xY3zzXuRnRgKpxTHLhi2HtHYNqS//k+yEk9SV1TqPR/ez76ULBNQ==, tarball: https://codeload.github.com/wwebjs/whatsapp-web.js/tar.gz/942d236a11ad68807308b058303ba5256915979c}
+  whatsapp-web.js@https://codeload.github.com/wwebjs/whatsapp-web.js/tar.gz/bfea4cf9d7c1955953c2966dcfb7f7ce78c816ab:
+    resolution: {gitHosted: true, integrity: sha512-R8u76Xd72eL8lteIyhYvm6vJM1uIJU9XBDSKsap9ne65vJKGewXLH9vWaRC62uwl0TTMKm+rHbm6DdbxgCgVlw==, tarball: https://codeload.github.com/wwebjs/whatsapp-web.js/tar.gz/bfea4cf9d7c1955953c2966dcfb7f7ce78c816ab}
     version: 1.34.7
     engines: {node: '>=18.0.0'}
 
@@ -10075,7 +10075,7 @@ snapshots:
 
   websocket-extensions@0.1.4: {}
 
-  whatsapp-web.js@https://codeload.github.com/wwebjs/whatsapp-web.js/tar.gz/942d236a11ad68807308b058303ba5256915979c:
+  whatsapp-web.js@https://codeload.github.com/wwebjs/whatsapp-web.js/tar.gz/bfea4cf9d7c1955953c2966dcfb7f7ce78c816ab:
     dependencies:
       fluent-ffmpeg: 2.1.3
       mime: 3.0.0
